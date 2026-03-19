@@ -25,7 +25,7 @@ As required by the coursework specification:
 | GitHub Username | Name | QMUL ID |
 |-----------------|------|----------|
 | ZZC10 | Zuchen Zhuang | 231226107 |
-|  |  |  |
+| SixId666 | Xinpeng Zhang | 231226071|
 |  |  |  |
 |  |  |  |
 |  |  |  |
