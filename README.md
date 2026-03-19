@@ -28,5 +28,5 @@ As required by the coursework specification:
 | SixId666 | Xinpeng Zhang | 231226071|
 | XY20210401 | Yu Yue | 231226152 |
 | showmaker423 | Bohan Wu | 231226200 |
-|  |  |  |
+| aaoozzhhii | Aozhi Guo | 231226082 |
 |  |  |  |
