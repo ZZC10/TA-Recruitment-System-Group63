@@ -1,0 +1,8 @@
+[ {
+  "username" : "testUser_1774690937808",
+  "password" : "password123",
+  "email" : "test@bupt.edu.cn",
+  "role" : "ta",
+  "status" : "active",
+  "createTime" : [ 2026, 3, 28, 17, 42, 17, 834593500 ]
+} ]
