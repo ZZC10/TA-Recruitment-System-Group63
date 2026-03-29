@@ -1,0 +1,13 @@
+[ {
+  "id" : "fab58ac7-1420-4eed-ad72-6575721a7713",
+  "username" : "showmaker",
+  "realName" : "Test Wu",
+  "studentId" : "test123",
+  "major" : "IoT",
+  "yearOfStudy" : "3",
+  "gpa" : 4.0,
+  "skills" : "Test",
+  "experience" : "Test",
+  "cvFilePath" : null,
+  "photoPath" : null
+} ]

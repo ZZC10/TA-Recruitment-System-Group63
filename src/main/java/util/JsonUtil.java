@@ -100,6 +100,29 @@ public class JsonUtil {
     // --- Module Methods ---
     public static List<MoModule> loadModules() { return loadList(MODULE_FILE, new TypeReference<List<MoModule>>() {}); }
     public static void addModule(MoModule module) { List<MoModule> modules = loadModules(); modules.add(module); saveList(MODULE_FILE, modules); }
+
+    // --- Profile Methods ---
+    public static List<TaProfile> loadProfiles() { return loadList(PROFILE_FILE, new TypeReference<List<TaProfile>>() {}); }
+    public static void saveProfiles(List<TaProfile> profiles) { saveList(PROFILE_FILE, profiles); }
+    public static TaProfile getProfileByUsername(String username) {
+        return loadProfiles().stream().filter(p -> p.getUsername().equals(username)).findFirst().orElse(null);
+    }
+    public static void updateProfile(TaProfile profile) {
+        List<TaProfile> profiles = loadProfiles();
+        boolean found = false;
+        for (int i = 0; i < profiles.size(); i++) {
+            if (profiles.get(i).getUsername().equals(profile.getUsername())) {
+                profiles.set(i, profile);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            profiles.add(profile);
+        }
+        saveProfiles(profiles);
+    }
+
     public static void updateApplicationStatus(String appId, String status, String feedback) {
         List<Application> apps = loadApplications();
         for (Application app : apps) {
