@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.bupt.ta.model.User" %>
 <%@ page import="com.bupt.ta.model.Job" %>
 <%@ page import="com.bupt.ta.model.Application" %>
@@ -89,7 +89,7 @@
                         <p>EMAIL: <%= user.getEmail() %></p>
                         <p>STATUS: <%= user.getStatus() %></p>
                     </div>
-                    <button class="btn" style="padding: 10px 20px;">UPDATE RESUME / PROFILE</button>
+                    <a href="${pageContext.request.contextPath}/profile" class="btn" style="padding: 10px 20px;">UPDATE RESUME / PROFILE</a>
                 </div>
             </div>
         <% } %>
