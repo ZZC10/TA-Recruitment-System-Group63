@@ -89,4 +89,43 @@ public class FileUtil {
             }
         }
     }
-}
+    
+    public static List<String[]> searchByField(String filePath, int fieldIndex, String searchValue) {
+        List<String[]> results = new ArrayList<>();
+        List<String[]> allData = readCSV(filePath);
+        
+        for (String[] row : allData) {
+            if (row.length > fieldIndex && row[fieldIndex].equals(searchValue)) {
+                results.add(row);
+            }
+        }
+        
+        return results;
+    }
+    
+    public static void updateRow(String filePath, int rowIndex, String[] newData) {
+        List<String[]> allData = readCSV(filePath);
+        if (rowIndex >= 0 && rowIndex < allData.size()) {
+            allData.set(rowIndex, newData);
+            writeCSV(filePath, allData);
+        } else {
+            System.out.println("Invalid row index: " + rowIndex);
+        }
+    }
+    
+    public static void addRow(String filePath, String[] newRow) {
+        List<String[]> allData = readCSV(filePath);
+        allData.add(newRow);
+        writeCSV(filePath, allData);
+    }
+    
+    public static void deleteRow(String filePath, int rowIndex) {
+        List<String[]> allData = readCSV(filePath);
+        if (rowIndex >= 0 && rowIndex < allData.size()) {
+            allData.remove(rowIndex);
+            writeCSV(filePath, allData);
+        } else {
+            System.out.println("Invalid row index: " + rowIndex);
+        }
+    }
+}    
