@@ -1,13 +1,5 @@
 package module;
 
-<<<<<<< HEAD
-public class ModuleService {
-    
-    public void createModule() {
-        System.out.println("Create module function to be implemented");
-    }
-}
-=======
 import common.FileUtil;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -249,4 +241,3 @@ public class ModuleService {
         return false;
     }
 }
->>>>>>> update-guo
