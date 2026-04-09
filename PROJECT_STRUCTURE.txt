@@ -1,0 +1,38 @@
+src/
+├── auth/
+│   └── AuthService.java
+├── user/
+│   └── UserService.java
+├── job/
+│   └── JobService.java
+├── module/
+│   └── ModuleService.java
+├── position/
+│   └── PositionService.java
+├── common/
+│   ├── FileUtil.java
+│   └── TestFramework.java
+└── Main.java
+
+项目根目录/
+├── src/ (Java源代码目录)
+│   ├── auth/ (登录注册模块 - 成员1)
+│   │   └── AuthService.java
+│   ├── user/ (个人信息模块 - 成员2)
+│   │   └── UserService.java
+│   ├── job/ (职位浏览模块 - 成员3)
+│   │   └── JobService.java
+│   ├── module/ (模块管理模块 - 成员4)
+│   │   └── ModuleService.java
+│   ├── position/ (职位发布模块 - 成员5)
+│   │   └── PositionService.java
+│   ├── common/ (通用工具类 - 成员6)
+│   │   ├── FileUtil.java (CSV文件读写工具类)
+│   │   └── TestFramework.java (框架测试类)
+│   └── Main.java (系统唯一入口)
+├── users.csv (用户数据文件)
+├── modules.csv (模块数据文件)
+├── jobs.csv (职位数据文件)
+├── DEVELOPMENT_STANDARDS_CN.md (开发规范文档)
+├── EBU6304_GroupProjectHandout.pdf (项目说明文档)
+└── ProductBacklog_group63.xlsx (产品需求文档)
