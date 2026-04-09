@@ -49,7 +49,8 @@ public class AuthService {
         String[] newUser = {studentId, password, name};
         users.add(newUser);
 
-        boolean success = FileUtil.writeCSV("users.csv", users);
+        FileUtil.writeCSV("users.csv", users);
+        boolean success = true; // 假设写入成功，因writeCSV返回void
 
         if (success) {
             System.out.println("注册成功！欢迎 " + name);
