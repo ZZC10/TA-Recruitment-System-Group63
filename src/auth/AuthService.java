@@ -84,4 +84,12 @@ public class AuthService {
         System.out.println("登录失败：学号或密码错误");
         return false;
     }
+    // 保留无参数方法以兼容Main.java
+    public void register() {
+        System.out.println("Register function called");
+    }
+    
+    public void login() {
+        System.out.println("Login function called");
+    }
 }
