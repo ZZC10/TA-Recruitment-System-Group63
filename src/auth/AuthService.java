@@ -38,7 +38,11 @@ public class AuthService {
         }
 
         List<String[]> users = FileUtil.readCSV("users.csv");
-
+        if (users == null) {
+            System.out.println("注册失败：无法读取用户数据");
+            return false;
+        }
+        
         for (String[] user : users) {
             if (user.length > 0 && user[0].equals(studentId)) {
                 System.out.println("注册失败：学号 " + studentId + " 已存在");
@@ -50,15 +54,9 @@ public class AuthService {
         users.add(newUser);
 
         FileUtil.writeCSV("users.csv", users);
-        boolean success = true; // 假设写入成功，因writeCSV返回void
+        System.out.println("注册成功！欢迎 " + name);
 
-        if (success) {
-            System.out.println("注册成功！欢迎 " + name);
-        } else {
-            System.out.println("注册失败：文件写入错误");
-        }
-
-        return success;
+        return true;
     }
 
     public boolean login(String studentId, String password) {
@@ -72,7 +70,11 @@ public class AuthService {
         }
 
         List<String[]> users = FileUtil.readCSV("users.csv");
-
+        if (users == null) {
+            System.out.println("登录失败：无法读取用户数据");
+            return false;
+        }
+        
         for (String[] user : users) {
             if (user.length >= 2 && user[0].equals(studentId) && user[1].equals(password)) {
                 String name = user.length >= 3 ? user[2] : studentId;
@@ -83,5 +85,13 @@ public class AuthService {
 
         System.out.println("登录失败：学号或密码错误");
         return false;
+    }
+    // 保留无参数方法以兼容Main.java
+    public void register() {
+        System.out.println("Register function called");
+    }
+    
+    public void login() {
+        System.out.println("Login function called");
     }
 }
