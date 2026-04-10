@@ -1,5 +1,6 @@
 import auth.AuthService;
 import user.UserService;
+import user.UploadCV;
 import job.JobService;
 import module.ModuleService;
 import position.PositionService;
@@ -10,6 +11,7 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final AuthService authService = new AuthService();
     private static final UserService userService = new UserService();
+    private static final UploadCV uploadCV = new UploadCV();
     private static final JobService jobService = new JobService();
     private static final ModuleService moduleService = new ModuleService();
     private static final PositionService positionService = new PositionService();
@@ -39,6 +41,9 @@ public class Main {
                 case 6:
                     positionService.publishJob();
                     break;
+                case 7:
+                    uploadCV.upload();
+                    break;
                 case 0:
                     System.out.println("Thank you for using. Goodbye!");
                     scanner.close();
@@ -57,6 +62,7 @@ public class Main {
         System.out.println("4. Browse Job Categories");
         System.out.println("5. Create Module");
         System.out.println("6. Publish Job");
+        System.out.println("7. Upload/Update CV");
         System.out.println("0. Exit System");
         System.out.print("Please select an operation: ");
     }
