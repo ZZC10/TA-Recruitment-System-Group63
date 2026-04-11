@@ -7,22 +7,34 @@ import java.util.Scanner;
 
 public class JobService {
     
-    private static final Scanner scanner = new Scanner(System.in);
+    private Scanner scanner;
     private static final String JOBS_FILE = "jobs.csv";
     
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+    
     public void showCategories() {
-        System.out.println("\n========== Job Categories ==========");
+        System.out.println("\n==================================");
+        System.out.println("       Browse Job Categories");
+        System.out.println("==================================");
         
         List<String[]> jobs = FileUtil.readCSV(JOBS_FILE);
         if (jobs.isEmpty() || jobs.size() <= 1) {
+            System.out.println("------------------------------------------");
             System.out.println("No job information available");
+            System.out.println("------------------------------------------");
+            System.out.println("==================================");
             return;
         }
         
         String[] header = jobs.get(0);
         int categoryIndex = findCategoryIndex(header);
         if (categoryIndex == -1) {
+            System.out.println("------------------------------------------");
             System.out.println("Data file error: cannot find jobCategory column");
+            System.out.println("------------------------------------------");
+            System.out.println("==================================");
             return;
         }
         
@@ -37,29 +49,38 @@ public class JobService {
             }
         }
         
-        System.out.println("\nPlease select a job category:");
+        System.out.println("------------------------------------------");
+        System.out.println("Available Job Categories:");
         for (int i = 0; i < categories.size(); i++) {
             System.out.println((i + 1) + ". " + categories.get(i));
         }
         System.out.println("0. Back to main menu");
-        System.out.print("Enter your choice: ");
+        System.out.println("------------------------------------------");
+        System.out.print("Please select a category: ");
         
         int choice;
         try {
             choice = scanner.nextInt();
             scanner.nextLine();
         } catch (Exception e) {
-            scanner.nextLine();
+            // Handle case where there's no more input
+            System.out.println("------------------------------------------");
             System.out.println("Please enter a valid number");
+            System.out.println("------------------------------------------");
+            System.out.println("==================================");
             return;
         }
         
         if (choice == 0) {
+            System.out.println("==================================");
             return;
         }
         
         if (choice < 1 || choice > categories.size()) {
+            System.out.println("------------------------------------------");
             System.out.println("Invalid choice");
+            System.out.println("------------------------------------------");
+            System.out.println("==================================");
             return;
         }
         
@@ -77,7 +98,9 @@ public class JobService {
     }
     
     private void displayJobsByCategory(List<String[]> jobs, String[] header, String category) {
-        System.out.println("\n========== " + category + " Jobs ==========");
+        System.out.println("\n==================================");
+        System.out.println("        Jobs in Category: " + category);
+        System.out.println("==================================");
         
         int idIndex = findColumnIndex(header, "jobId");
         int titleIndex = findColumnIndex(header, "jobTitle");
@@ -91,7 +114,7 @@ public class JobService {
             String[] row = jobs.get(i);
             if (row.length > catIndex && row[catIndex].trim().equals(category)) {
                 found = true;
-                System.out.println("-----------------------------------");
+                System.out.println("------------------------------------------");
                 if (idIndex != -1) System.out.println("Job ID: " + row[idIndex]);
                 if (titleIndex != -1) System.out.println("Title: " + row[titleIndex]);
                 if (moduleIdIndex != -1) System.out.println("Module ID: " + row[moduleIdIndex]);
@@ -101,10 +124,13 @@ public class JobService {
         }
         
         if (!found) {
-            System.out.println("No jobs in this category");
+            System.out.println("------------------------------------------");
+            System.out.println("No jobs found in this category");
+            System.out.println("------------------------------------------");
         }
         
-        System.out.println("\nPress Enter to continue...");
+        System.out.println("\n==================================");
+        System.out.print("Press Enter to return to main menu...");
         scanner.nextLine();
     }
     
