@@ -7,11 +7,20 @@ import java.util.Scanner;
 public class UploadCV {
     
     private static final String USER_FILE = "users.csv";
-    private final Scanner scanner = new Scanner(System.in);
+    private Scanner scanner;
+    
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
     
     public void upload() {
-        System.out.println("\n--- Upload/Update CV ---");
-        System.out.print("Enter your Student ID: ");
+        System.out.println("\n==================================");
+        System.out.println("         Upload/Update CV");
+        System.out.println("==================================");
+        System.out.println("Please enter your Student ID to upload or update your CV:");
+        System.out.println("------------------------------------------");
+        
+        System.out.print("Student ID (e.g., 2023001): ");
         String studentId = scanner.nextLine().trim();
         
         List<String[]> userData = FileUtil.readCSV(USER_FILE);
@@ -21,16 +30,23 @@ public class UploadCV {
             String[] user = userData.get(i);
             if (user.length > 0 && user[0].equals(studentId)) {
                 found = true;
-                
+                System.out.println("------------------------------------------");
                 System.out.println("User found: " + user[1]);
+                System.out.println("------------------------------------------");
+                System.out.println("Please enter your CV information:");
+                System.out.println("(Press enter to keep current information)");
+                System.out.println("1. Intention (e.g., Software Development TA)");
+                System.out.println("2. Personal Experience (e.g., Internship, Projects)");
+                System.out.println("3. Personal Skills (e.g., Java, Python, Communication)");
+                System.out.println("------------------------------------------");
                 
-                System.out.print("Enter Intention (意向): ");
+                System.out.print("1. Intention (e.g., Software Development TA): ");
                 String intention = scanner.nextLine().replace(",", ";").trim();
                 
-                System.out.print("Enter Personal Experience (个人经历): ");
+                System.out.print("2. Personal Experience (e.g., Internship, Projects): ");
                 String experience = scanner.nextLine().replace(",", ";").trim();
                 
-                System.out.print("Enter Personal Skills (个人技能): ");
+                System.out.print("3. Personal Skills (e.g., Java, Python, Communication): ");
                 String skills = scanner.nextLine().replace(",", ";").trim();
                 
                 // Prepare updated user record with 8 fields: 
@@ -63,13 +79,19 @@ public class UploadCV {
                 }
                 
                 FileUtil.writeCSV(USER_FILE, userData);
+                System.out.println("------------------------------------------");
                 System.out.println("CV uploaded/updated successfully!");
+                System.out.println("------------------------------------------");
                 break;
             }
         }
         
         if (!found) {
-            System.out.println("Error: User with Student ID " + studentId + " not found. Please register first.");
+            System.out.println("------------------------------------------");
+            System.out.println("Error: User with Student ID " + studentId + " not found.");
+            System.out.println("Please register first before uploading CV.");
+            System.out.println("------------------------------------------");
         }
+        System.out.println("==================================");
     }
 }

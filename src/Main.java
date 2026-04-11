@@ -16,11 +16,28 @@ public class Main {
     private static final ModuleService moduleService = new ModuleService();
     private static final PositionService positionService = new PositionService();
     
+    static {
+        // Pass scanner to all service classes
+        authService.setScanner(scanner);
+        userService.setScanner(scanner);
+        uploadCV.setScanner(scanner);
+        jobService.setScanner(scanner);
+        moduleService.setScanner(scanner);
+        positionService.setScanner(scanner);
+    }
+    
     public static void main(String[] args) {
         while (true) {
             displayMenu();
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            int choice;
+            try {
+                choice = scanner.nextInt();
+                scanner.nextLine();
+            } catch (Exception e) {
+                scanner.nextLine(); // Clear the invalid input
+                System.out.println("Invalid input, please enter a number");
+                continue;
+            }
             
             switch (choice) {
                 case 1:
