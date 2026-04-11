@@ -50,7 +50,7 @@ public class AuthService {
             }
         }
 
-        String[] newUser = {studentId, password, name};
+        String[] newUser = {studentId, name, password};
         users.add(newUser);
 
         FileUtil.writeCSV("users.csv", users);
