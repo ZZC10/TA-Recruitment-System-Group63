@@ -19,6 +19,10 @@ public class AuthService {
     }
 
     public boolean register(String studentId, String password, String name) {
+        return register(studentId, password, name, "TA");
+    }
+
+    public boolean register(String studentId, String password, String name, String role) {
         if (studentId == null || studentId.trim().isEmpty()) {
             System.out.println("Student ID cannot be empty");
             return false;
@@ -30,6 +34,9 @@ public class AuthService {
         if (name == null || name.trim().isEmpty()) {
             System.out.println("Name cannot be empty");
             return false;
+        }
+        if (role == null || role.trim().isEmpty()) {
+            role = "TA";
         }
 
         if (!isValidPassword(password)) {
@@ -50,11 +57,23 @@ public class AuthService {
             }
         }
 
-        String[] newUser = {studentId, name, password};
+        // Check current columns count
+        int columnsCount = 9; // studentId,name,password,email,major,intention,experience,skills,role
+        String[] newUser = new String[columnsCount];
+        newUser[0] = studentId;
+        newUser[1] = name;
+        newUser[2] = password;
+        newUser[3] = "";
+        newUser[4] = "";
+        newUser[5] = "";
+        newUser[6] = "";
+        newUser[7] = "";
+        newUser[8] = role;
+
         users.add(newUser);
 
         FileUtil.writeCSV("users.csv", users);
-        System.out.println("Registration successful! Welcome " + name);
+        System.out.println("Registration successful! Welcome " + name + " (" + role + ")");
 
         return true;
     }
@@ -76,9 +95,10 @@ public class AuthService {
         }
         
         for (String[] user : users) {
-            if (user.length >= 2 && user[0].equals(studentId) && user[1].equals(password)) {
-                String name = user.length >= 3 ? user[2] : studentId;
-                System.out.println("Login successful! Welcome back, " + name);
+            if (user.length >= 3 && user[0].equals(studentId) && user[2].equals(password)) {
+                String name = user.length >= 2 ? user[1] : studentId;
+                String role = user.length >= 9 ? user[8] : "TA";
+                System.out.println("Login successful! Welcome back, " + name + " (" + role + ")");
                 return true;
             }
         }
@@ -86,6 +106,27 @@ public class AuthService {
         System.out.println("Login failed: incorrect student ID or password");
         return false;
     }
+    
+    public String getUserRole(String studentId) {
+        List<String[]> users = FileUtil.readCSV("users.csv");
+        if (users == null) {
+            return "TA"; // Default role
+        }
+        
+        for (String[] user : users) {
+            if (user.length >= 9 && user[0].equals(studentId)) {
+                return user[8];
+            }
+        }
+        
+        return "TA"; // Default role
+    }
+    
+    public boolean hasRole(String studentId, String requiredRole) {
+        String userRole = getUserRole(studentId);
+        return userRole.equals(requiredRole);
+    }
+    
     private java.util.Scanner scanner;
     
     public void setScanner(java.util.Scanner scanner) {
@@ -102,6 +143,7 @@ public class AuthService {
         System.out.println("1. Student ID (e.g., 2023001)");
         System.out.println("2. Password (at least 6 chars, letters + numbers)");
         System.out.println("3. Full Name");
+        System.out.println("4. Role (TA, MO, ADMIN) [Default: TA]");
         System.out.println("------------------------------------------");
         
         System.out.print("1. Student ID (e.g., 2023001): ");
@@ -113,8 +155,14 @@ public class AuthService {
         System.out.print("3. Full Name: ");
         String name = scanner.nextLine().trim();
         
+        System.out.print("4. Role (TA, MO, ADMIN) [Default: TA]: ");
+        String role = scanner.nextLine().trim();
+        if (role.isEmpty()) {
+            role = "TA";
+        }
+        
         System.out.println("------------------------------------------");
-        register(studentId, password, name);
+        register(studentId, password, name, role);
         System.out.println("==================================");
     }
     
