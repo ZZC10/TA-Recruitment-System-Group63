@@ -1,147 +1,203 @@
 # EBU6304 Group63 V1 Development Standards Manual
 
-# Development Standards Document
-
-# EBU6304 Group63 V1 Development Standards Manual
-
-**Applicable Scenario**: Parallel development for project V1 | **Effective Date**: 2026.03.29
+**Applicable Scenario**: Parallel development for project V1 | **Effective Date**: 2026.03.29 | **Last Updated**: 2026.04.19
 
 **Purpose**: To unify code standards, ensuring the work of six members does not conflict and can be integrated into a runnable V1 version with a single merge.
 
 ---
 
-## 1. Unified Core Standards (Mandatory for all members)
+## 1. Unified Core Standards
 
-### 1. Fixed package structure (do not modify or add)
+### 1.1 Fixed Package Structure
 
-```Plain Text
-
+```
 src/
-├── auth/        # Member 1: Login/Register module
-├── user/        # Member 2: Personal information module
-├── job/         # Member 3: Job browsing module
-├── module/      # Member 4: Module management module
-├── position/    # Member 5: Job posting module
-├── common/      # Member 6: Common utilities
-└── Main.java    # The single system entry point (do not change logic)
+├── auth/        # Member 1: Login/Register + Role management
+├── user/        # Member 2: Personal information + CV
+├── job/         # Member 3: Job browsing + Application
+├── module/      # Member 4: Module management
+├── position/    # Member 5: Job publishing
+├── common/      # Member 6: FileUtil + Framework
+└── Main.java    # Single entry point (role-based menu)
 ```
 
-### 2. Fixed data files (do not change file names or formats)
+### 1.2 Fixed Data Files
 
-- `users.csv`: user data
+| File | Fields | Storage |
+|------|--------|---------|
+| `users.csv` | studentId,name,password,email,major,intention,experience,skills,role | Project root |
+| `jobs.csv` | jobId,jobTitle,jobCategory,moduleId,deadline,description | Project root |
+| `modules.csv` | moduleId,moduleName,moduleLeader,creationDate | Project root |
+| `applications.csv` | studentId,jobId,status,applyDate,decisionDate | Project root |
 
-- `modules.csv`: module data
+**Note**: All file operations must use `common.FileUtil`
 
-- `jobs.csv`: job data
+### 1.3 Role Definition
 
-- Storage location: project root; always read/write via `common.FileUtil`
-
-### 3. Unified coding conventions
-
-1. Class and method names use camelCase; comments must be clear.
-
-2. Do not modify other members' packages, classes, or methods.
-
-3. Do not create custom data files or utility classes.
-
-4. All functionality must be exposed through the fixed service methods.
-
-### 4. Git conventions
-
-1. Personal branch name: `feature-Name`
-
-2. Commit message format: `feat/<module>: completed <feature>`
-
-3. Merge only into the `dev` branch; do not commit directly to `master`.
+| Role | Description | Permissions |
+|------|-------------|-------------|
+| TA | Teaching Assistant applicant | Browse jobs, apply, check status, update CV |
+| MO | Module Organiser | Publish jobs, view applicants, approve/reject |
+| ADMIN | System administrator | Manage modules, view TA workload, manage users |
 
 ---
 
-## 2. Individual Member Development Rules & Notes
+## 2. Team Member Assignments
 
-### Zhuang Zuchen (auth/ Login & Registration module)
+### Member 1: Zhuang Zuchen (auth/)
+**Files**: `src/auth/AuthService.java`, `users.csv`
+**Tasks**:
+- Add `role` field to `users.csv` (default: TA)
+- Implement role management methods: `getUserRole()`, `hasRole()`
+- Modify `register()` to accept role parameter (default: TA)
+- Modify `login()` to return user role
 
-1. Responsible: `AuthService` class — implement `register()` and `login()` methods.
+### Member 2: Wu Bohan (user/)
+**Files**: `src/user/UserService.java`, `src/user/UploadCV.java`
+**Tasks**:
+- Add `getUserByStudentId()`, `getAllUsers()`, `updateUserRole()`
+- Ensure CV upload only for TA role
+- Add permission checks to existing methods
 
-2. Only operate on: `users.csv`.
+### Member 3: Xing Wanying (job/)
+**Files**: `src/job/JobService.java`
+**Tasks**:
+- Add `applyForJob()` - TA applies for a position
+- Add `viewApplicants()` - MO views applicants for a job
+- Add `showJobsByModule()` - MO views jobs by module
+- Add permission checks (TA: apply; MO: view applicants)
 
-3. Notes: Ensure unique student ID validation and password format validation.
+### Member 4: Guo Aozhi (module/)
+**Files**: `src/module/ModuleService.java`
+**Tasks**:
+- Add `getModulesByLeader()`, `getModuleById()`
+- Add permission checks (ADMIN only for create/modify/delete)
+- Bind MO accounts to modules
 
-4. Prohibited: Modifying other packages, utility classes, or `Main`.
+### Member 5: Yu Yue (position/)
+**Files**: `src/position/PositionService.java`
+**Tasks**:
+- Add permission checks to `publishJob()` (MO/ADMIN only)
+- Validate module existence before publishing
 
-### Wu Bohan (user/ Personal Information module)
+### Member 6: Zhang Xinpeng (common/)
+**Files**: `src/common/FileUtil.java`, `src/Main.java`, `applications.csv`
+**Tasks**:
+- Create `applications.csv` file
+- Create `ApplicationService.java` (or assign to another member)
+- Modify `Main.java` for role-based menus (showTAMenu/showMOMenu/showAdminMenu)
+- Coordinate module integration
+- Optimize FileUtil if needed
 
-1. Responsible: `UserService` class — implement `updateInfo()` method.
-
-2. Only operate on: `users.csv` (only modify non-core fields).
-
-3. Notes: Student ID and name must not be changed.
-
-4. Prohibited: Modifying data file formats or calling other modules' business logic.
-
-### Xing Wanying (job/ Job Browsing module)
-
-1. Responsible: `JobService` class — implement `showCategories()` method.
-
-2. Only operate on: `jobs.csv`.
-
-3. Notes: Implement job category display and filtering features.
-
-4. Prohibited: Modifying module or job data structures.
-
-### Guo Aozhi (module/ Module Management module)
-
-1. Responsible: `ModuleService` class — implement `createModule()` method.
-
-2. Only operate on: `modules.csv`.
-
-3. Notes: Handle module addition, retrieval, and updates; bind MO accounts.
-
-4. Prohibited: Preemptively writing job posting related logic.
-
-### Yu Yue (position/ Job Posting module)
-
-1. Responsible: `PositionService` class — implement `publishJob()` method.
-
-2. Only operate on: `jobs.csv`; must relate to `modules.csv` in the fixed format.
-
-3. Notes: Validate deadlines and persist job postings.
-
-4. Prohibited: Modifying module data or depending on Member 4's runtime code.
-
-### Zhang Xinpeng (common/ Framework & Utility classes)
-
-1. **Pre-task**: Spend 10 minutes building the complete project skeleton (package structure + empty service classes + Main).
-
-2. Responsible: `FileUtil` utility class to implement unified CSV read/write.
-
-3. Notes: Encapsulate common methods and handle file exceptions.
-
-4. Privileges: Sole authority to modify the framework and perform merges.
-
----
-
-## 3. Code Integration Rules
-
-1. After the framework is set up, all members develop in parallel without waiting for dependencies.
-
-2. After development, push to your personal branch and request a merge into `dev`.
-
-3. Member 6 will handle merging and testing centrally; others need not take action.
-
-4. Running `Main.java` should start the full V1 system.
+### Application Module (NEW - Assign to one member)
+**Files**: `applications.csv`, `src/application/ApplicationService.java`
+**Tasks**:
+- Create `applications.csv` with fields: studentId,jobId,status,applyDate,decisionDate
+- Implement methods:
+  - `applyForJob(studentId, jobId)` - TA applies
+  - `getApplicationStatus(studentId, jobId)` - TA checks status
+  - `getApplicantsByJob(jobId)` - MO views applicants
+  - `approveApplication(studentId, jobId, approved)` - MO approves/rejects
+  - `getTAWorkload(studentId)` - ADMIN views statistics
+- Implement constraints:
+  - Prevent duplicate applications
+  - Validate job existence
+  - Validate user existence
+  - Status flow: PENDING → ACCEPTED/REJECTED
 
 ---
 
-## 4. Prohibited Actions (Violations may cause integration failure)
+## 3. Permission Matrix
 
-1. Do not modify the unified package structure or data file names.
-
-2. Do not modify other people's code, methods, or classes.
-
-3. Do not create custom utility classes or change the data storage approach.
-
-4. Do not commit directly to the `master` branch.
+| Function | TA | MO | ADMIN |
+|----------|----|----|-------|
+| Register | ✅ | ✅ | ✅ |
+| Login | ✅ | ✅ | ✅ |
+| Update Personal Info | ✅ | ✅ | ✅ |
+| Upload/Update CV | ✅ | ❌ | ❌ |
+| Browse Jobs | ✅ | ✅ | ✅ |
+| Apply for Job | ✅ | ❌ | ❌ |
+| Check Application Status | ✅ | ❌ | ❌ |
+| Publish Job | ❌ | ✅ | ✅ |
+| View Applicants | ❌ | ✅ | ✅ |
+| Approve/Reject | ❌ | ✅ | ✅ |
+| Manage Modules | ❌ | ❌ | ✅ |
+| View TA Workload | ❌ | ❌ | ✅ |
+| Manage Users | ❌ | ❌ | ✅ |
 
 ---
 
+## 4. Business Process
 
+### TA Flow
+```
+Browse Jobs → Apply for Job → Check Application Status → (Result: ACCEPTED/REJECTED)
+```
+
+### MO Flow
+```
+View Job Applicants → Review Applicant Info → Approve/Reject Application
+```
+
+### ADMIN Flow
+```
+View TA Workload Statistics → (Optional) Manage Users/Modules
+```
+
+---
+
+## 5. Module Integration
+
+| From | To | Call |
+|------|----|------|
+| Main | Auth | `getUserRole()`, `login()` |
+| Job | Application | `applyForJob()`, `getApplicantsByJob()` |
+| Application | User | `getUserByStudentId()` |
+| Position | Module | `getModuleById()` (validate) |
+| Module | Job | `getJobsByModule()` |
+
+---
+
+## 6. Git Conventions
+
+- **Branch name**: `feature-Name`
+- **Commit format**: `feat/<module>: completed <feature>`
+- **Merge target**: `dev` branch only
+- **Prohibited**: Direct commit to `master`
+
+---
+
+## 7. Prohibited Actions
+
+1. Do not modify package structure or data file names
+2. Do not modify other members' code without permission
+3. Do not create custom utility classes (use FileUtil)
+4. Do not change CSV storage approach
+5. Do not delete existing functionality (extend only)
+6. Do not commit directly to `master`
+
+---
+
+## 8. File Modification Checklist
+
+| File | Owner | Status | Description |
+|------|-------|--------|-------------|
+| users.csv | Zhuang Zuchen | ⬜ | Add role field |
+| AuthService.java | Zhuang Zuchen | ⬜ | Add role methods |
+| Main.java | Zhang Xinpeng | ⬜ | Role-based menus |
+| applications.csv | TBD | ⬜ | Create new file |
+| ApplicationService.java | TBD | ⬜ | Create new class |
+| UserService.java | Wu Bohan | ⬜ | Add query methods |
+| JobService.java | Xing Wanying | ⬜ | Add apply functions |
+| PositionService.java | Yu Yue | ⬜ | Add permission checks |
+| ModuleService.java | Guo Aozhi | ⬜ | Add permission checks |
+
+---
+
+## 9. Notes
+
+1. **Default role for new users**: TA
+2. **Application status values**: PENDING, ACCEPTED, REJECTED
+3. **Scanner management**: Single instance in Main, passed via `setScanner()`
+4. **All members must read this document before starting development**
+5. **Questions? Contact Member 6 for framework-related issues**
