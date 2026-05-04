@@ -78,20 +78,20 @@ public class AuthService {
         return true;
     }
 
-    public boolean login(String studentId, String password) {
+    public String login(String studentId, String password) {
         if (studentId == null || studentId.trim().isEmpty()) {
             System.out.println("Student ID cannot be empty");
-            return false;
+            return null;
         }
         if (password == null || password.trim().isEmpty()) {
             System.out.println("Password cannot be empty");
-            return false;
+            return null;
         }
 
         List<String[]> users = FileUtil.readCSV("users.csv");
         if (users == null) {
             System.out.println("Login failed: cannot read user data");
-            return false;
+            return null;
         }
         
         for (String[] user : users) {
@@ -99,12 +99,12 @@ public class AuthService {
                 String name = user.length >= 2 ? user[1] : studentId;
                 String role = user.length >= 9 ? user[8] : "TA";
                 System.out.println("Login successful! Welcome back, " + name + " (" + role + ")");
-                return true;
+                return role;  // 返回角色
             }
         }
 
         System.out.println("Login failed: incorrect student ID or password");
-        return false;
+        return null;  // 登录失败返回 null
     }
     
     public String getUserRole(String studentId) {
@@ -166,7 +166,7 @@ public class AuthService {
         System.out.println("==================================");
     }
     
-    public void login() {
+    public String login() {
         System.out.println("\n==================================");
         System.out.println("           User Login");
         System.out.println("==================================");
@@ -183,7 +183,9 @@ public class AuthService {
         String password = scanner.nextLine().trim();
         
         System.out.println("------------------------------------------");
-        login(studentId, password);
+        String role = login(studentId, password);
         System.out.println("==================================");
+        
+        return role;
     }
 }
