@@ -1,119 +1,118 @@
-package job;
+package src.job;
 
-import common.FileUtil;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import src.common.FileUtil;
+import src.auth.AuthService;
+
+import java.util.*;
 
 public class JobService {
-    
-    private static final Scanner scanner = new Scanner(System.in);
-    private static final String JOBS_FILE = "jobs.csv";
-    
-    public void showCategories() {
-        System.out.println("\n========== Job Categories ==========");
-        
-        List<String[]> jobs = FileUtil.readCSV(JOBS_FILE);
-        if (jobs.isEmpty() || jobs.size() <= 1) {
-            System.out.println("No job information available");
-            return;
-        }
-        
-        String[] header = jobs.get(0);
-        int categoryIndex = findCategoryIndex(header);
-        if (categoryIndex == -1) {
-            System.out.println("Data file error: cannot find jobCategory column");
-            return;
-        }
-        
-        List<String> categories = new ArrayList<>();
-        for (int i = 1; i < jobs.size(); i++) {
-            String[] row = jobs.get(i);
-            if (row.length > categoryIndex) {
-                String category = row[categoryIndex].trim();
-                if (!categories.contains(category) && !category.isEmpty()) {
-                    categories.add(category);
-                }
-            }
-        }
-        
-        System.out.println("\nPlease select a job category:");
-        for (int i = 0; i < categories.size(); i++) {
-            System.out.println((i + 1) + ". " + categories.get(i));
-        }
-        System.out.println("0. Back to main menu");
-        System.out.print("Enter your choice: ");
-        
-        int choice;
-        try {
-            choice = scanner.nextInt();
-            scanner.nextLine();
-        } catch (Exception e) {
-            scanner.nextLine();
-            System.out.println("Please enter a valid number");
-            return;
-        }
-        
-        if (choice == 0) {
-            return;
-        }
-        
-        if (choice < 1 || choice > categories.size()) {
-            System.out.println("Invalid choice");
-            return;
-        }
-        
-        String selectedCategory = categories.get(choice - 1);
-        displayJobsByCategory(jobs, header, selectedCategory);
+
+    private AuthService authService;
+
+    public JobService() {
+        this.authService = new AuthService();
     }
-    
-    private int findCategoryIndex(String[] header) {
-        for (int i = 0; i < header.length; i++) {
-            if ("jobCategory".equalsIgnoreCase(header[i].trim())) {
-                return i;
-            }
+
+    public void applyForJob(String studentId, String jobId) {
+        if (!authService.hasRole(studentId, "TA")) {
+            System.out.println("Permission denied: Only TA can apply for jobs.");
+            return;
         }
-        return -1;
+
+        if (!jobExists(jobId)) {
+            System.out.println("Error: Job ID " + jobId + " does not exist.");
+            return;
+        }
+
+        // TODO: Call ApplicationService.saveApplication() when available (Member 6)
+        System.out.println("Application submitted successfully for Job ID: " + jobId);
     }
-    
-    private void displayJobsByCategory(List<String[]> jobs, String[] header, String category) {
-        System.out.println("\n========== " + category + " Jobs ==========");
-        
-        int idIndex = findColumnIndex(header, "jobId");
-        int titleIndex = findColumnIndex(header, "jobTitle");
-        int moduleIdIndex = findColumnIndex(header, "moduleId");
-        int deadlineIndex = findColumnIndex(header, "deadline");
-        int descIndex = findColumnIndex(header, "description");
-        int catIndex = findCategoryIndex(header);
-        
-        boolean found = false;
-        for (int i = 1; i < jobs.size(); i++) {
-            String[] row = jobs.get(i);
-            if (row.length > catIndex && row[catIndex].trim().equals(category)) {
-                found = true;
-                System.out.println("-----------------------------------");
-                if (idIndex != -1) System.out.println("Job ID: " + row[idIndex]);
-                if (titleIndex != -1) System.out.println("Title: " + row[titleIndex]);
-                if (moduleIdIndex != -1) System.out.println("Module ID: " + row[moduleIdIndex]);
-                if (deadlineIndex != -1) System.out.println("Deadline: " + row[deadlineIndex]);
-                if (descIndex != -1) System.out.println("Description: " + row[descIndex]);
-            }
+
+    public void viewApplicants(String jobId) {
+        if (!jobExists(jobId)) {
+            System.out.println("Error: Job ID " + jobId + " does not exist.");
+            return;
         }
+
+        String jobTitle = getJobTitleById(jobId);
+        System.out.println("\n===== Applicants for Job: " + jobTitle + " =====");
         
-        if (!found) {
-            System.out.println("No jobs in this category");
-        }
+        // TODO: Call ApplicationService.getApplicantsByJobId() when available (Member 6)
+        System.out.println("(ApplicationService not yet implemented - pending Member 6)");
         
-        System.out.println("\nPress Enter to continue...");
-        scanner.nextLine();
+        System.out.println("=====================================");
     }
-    
-    private int findColumnIndex(String[] header, String columnName) {
-        for (int i = 0; i < header.length; i++) {
-            if (columnName.equalsIgnoreCase(header[i].trim())) {
-                return i;
+
+    public void showJobsByModule(String moduleId) {
+        if (!moduleExists(moduleId)) {
+            System.out.println("Error: Module ID " + moduleId + " does not exist.");
+            return;
+        }
+
+        String moduleName = getModuleNameById(moduleId);
+        System.out.println("\n===== Jobs for Module: " + moduleName + " =====");
+
+        List<String[]> jobs = FileUtil.readCSV("jobs.csv");
+        List<String[]> filteredJobs = new ArrayList<>();
+
+        for (String[] job : jobs) {
+            if (job.length > 3 && job[3].equals(moduleId)) {
+                filteredJobs.add(job);
             }
         }
-        return -1;
+
+        if (filteredJobs.isEmpty()) {
+            System.out.println("No jobs found for this module.");
+        } else {
+            System.out.printf("%-8s %-30s %-12s\n", "Job ID", "Job Title", "Deadline");
+            System.out.println("------------------------------------------------------");
+            for (String[] job : filteredJobs) {
+                String deadline = job.length > 4 ? job[4] : "N/A";
+                System.out.printf("%-8s %-30s %-12s\n", job[0], job[1], deadline);
+            }
+        }
+        System.out.println("=====================================");
+    }
+
+    private boolean jobExists(String jobId) {
+        List<String[]> jobs = FileUtil.readCSV("jobs.csv");
+        for (String[] job : jobs) {
+            if (job.length > 0 && job[0].equals(jobId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getJobTitleById(String jobId) {
+        List<String[]> jobs = FileUtil.readCSV("jobs.csv");
+        for (String[] job : jobs) {
+            if (job.length > 0 && job[0].equals(jobId)) {
+                return job.length > 1 ? job[1] : "Unknown";
+            }
+        }
+        return "Unknown Job";
+    }
+
+    private boolean moduleExists(String moduleId) {
+        List<String[]> modules = FileUtil.readCSV("modules.csv");
+        for (int i = 1; i < modules.size(); i++) {
+            String[] module = modules.get(i);
+            if (module.length > 0 && module[0].equals(moduleId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getModuleNameById(String moduleId) {
+        List<String[]> modules = FileUtil.readCSV("modules.csv");
+        for (int i = 1; i < modules.size(); i++) {
+            String[] module = modules.get(i);
+            if (module.length > 0 && module[0].equals(moduleId)) {
+                return module.length > 1 ? module[1] : "Unknown";
+            }
+        }
+        return "Unknown Module";
     }
 }
