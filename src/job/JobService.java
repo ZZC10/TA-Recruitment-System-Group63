@@ -1,18 +1,22 @@
-package src.job;
+package job;
 
-import src.common.FileUtil;
-import src.auth.AuthService;
+import common.FileUtil;
+import auth.AuthService;
+import application.ApplicationService;
 
 import java.util.*;
 
 public class JobService {
 
     private AuthService authService;
+    private ApplicationService applicationService;
 
     public JobService() {
         this.authService = new AuthService();
+        this.applicationService = new ApplicationService();
     }
 
+    // TA apply for a job
     public void applyForJob(String studentId, String jobId) {
         if (!authService.hasRole(studentId, "TA")) {
             System.out.println("Permission denied: Only TA can apply for jobs.");
@@ -24,10 +28,15 @@ public class JobService {
             return;
         }
 
-        // TODO: Call ApplicationService.saveApplication() when available (Member 6)
-        System.out.println("Application submitted successfully for Job ID: " + jobId);
+        boolean success = applicationService.applyForJob(studentId, jobId);
+        if (success) {
+            System.out.println("Application submitted successfully for Job ID: " + jobId);
+        } else {
+            System.out.println("Failed to apply for this job.");
+        }
     }
 
+    // MO view applicants for a job
     public void viewApplicants(String jobId) {
         if (!jobExists(jobId)) {
             System.out.println("Error: Job ID " + jobId + " does not exist.");
@@ -36,13 +45,23 @@ public class JobService {
 
         String jobTitle = getJobTitleById(jobId);
         System.out.println("\n===== Applicants for Job: " + jobTitle + " =====");
-        
-        // TODO: Call ApplicationService.getApplicantsByJobId() when available (Member 6)
-        System.out.println("(ApplicationService not yet implemented - pending Member 6)");
-        
+
+        List<String[]> applicants = applicationService.getApplicantsByJob(jobId);
+        if (applicants.isEmpty()) {
+            System.out.println("No applicants yet.");
+        } else {
+            System.out.printf("%-12s %-10s %-12s\n", "Student ID", "Status", "Apply Date");
+            System.out.println("------------------------------------------------");
+            for (String[] app : applicants) {
+                String status = app.length > 2 ? app[2] : "PENDING";
+                String applyDate = app.length > 3 ? app[3] : "N/A";
+                System.out.printf("%-12s %-10s %-12s\n", app[0], status, applyDate);
+            }
+        }
         System.out.println("=====================================");
     }
 
+    // MO view jobs by module
     public void showJobsByModule(String moduleId) {
         if (!moduleExists(moduleId)) {
             System.out.println("Error: Module ID " + moduleId + " does not exist.");
