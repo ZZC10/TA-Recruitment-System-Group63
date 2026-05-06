@@ -16,6 +16,32 @@ public class JobService {
         this.applicationService = new ApplicationService();
     }
 
+    // Browse job categories
+    public void showCategories() {
+        System.out.println("\n===== Job Categories =====");
+        
+        List<String[]> jobs = FileUtil.readCSV("jobs.csv");
+        if (jobs.isEmpty()) {
+            System.out.println("No jobs available.");
+            System.out.println("==========================");
+            return;
+        }
+        
+        System.out.printf("%-8s %-30s %-15s %-12s\n", "Job ID", "Job Title", "Category", "Deadline");
+        System.out.println("--------------------------------------------------------------");
+        
+        for (String[] job : jobs) {
+            String jobId = job.length > 0 ? job[0] : "N/A";
+            String title = job.length > 1 ? job[1] : "Unknown";
+            String category = job.length > 2 ? job[2] : "Uncategorized";
+            String deadline = job.length > 4 ? job[4] : "N/A";
+            
+            System.out.printf("%-8s %-30s %-15s %-12s\n", jobId, title, category, deadline);
+        }
+        
+        System.out.println("==========================");
+    }
+
     // TA apply for a job
     public void applyForJob(String studentId, String jobId) {
         if (!authService.hasRole(studentId, "TA")) {
@@ -24,11 +50,11 @@ public class JobService {
         }
 
         if (!jobExists(jobId)) {
-            System.out.println("Error: Job ID " + jobId + " does not exist.");  
+            System.out.println("Error: Job ID " + jobId + " does not exist.");
             return;
         }
 
-        boolean success = applicationService.applyForJob(studentId, jobId);     
+        boolean success = applicationService.applyForJob(studentId, jobId);
         if (success) {
             System.out.println("Application submitted successfully for Job ID: " + jobId);
         } else {
@@ -39,7 +65,7 @@ public class JobService {
     // MO view applicants for a job
     public void viewApplicants(String jobId) {
         if (!jobExists(jobId)) {
-            System.out.println("Error: Job ID " + jobId + " does not exist.");  
+            System.out.println("Error: Job ID " + jobId + " does not exist.");
             return;
         }
 

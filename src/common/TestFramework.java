@@ -37,7 +37,7 @@ public class TestFramework {
             System.out.println("  " + String.join(" | ", job));
         }
         
-        System.out.println("\n✓ FileUtil.readCSV() test passed\n");
+        System.out.println("\nFileUtil.readCSV() test passed\n");
     }
     
     public static void testFileUtilWrite() {
@@ -58,7 +58,7 @@ public class TestFramework {
             System.out.println("  " + String.join(" | ", row));
         }
         
-        System.out.println("\n✓ FileUtil.writeCSV() test passed\n");
+        System.out.println("\nFileUtil.writeCSV() test passed\n");
     }
     
     public static void testFileUtilExceptionHandling() {
@@ -73,6 +73,6 @@ public class TestFramework {
         System.out.println("users.csv exists: " + FileUtil.fileExists("users.csv"));
         System.out.println("not_exist.csv exists: " + FileUtil.fileExists("not_exist.csv"));
         
-        System.out.println("\n✓ Exception handling test passed\n");
+        System.out.println("\nException handling test passed\n");
     }
 }
