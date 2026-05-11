@@ -103,7 +103,7 @@ public class MainFrame extends JFrame {
         return panel;
     }
     
-    private void showWelcomePanel() {
+    public void showWelcomePanel() {
         JPanel welcomePanel = new JPanel(new BorderLayout());
         welcomePanel.setBackground(Color.WHITE);
         welcomePanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
