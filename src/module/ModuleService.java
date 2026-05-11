@@ -20,7 +20,95 @@ public class ModuleService {
     public void setCurrentRole(String role) {
         this.currentUserRole = role;
     }
-    
+
+    /**
+     * Get all modules from CSV
+     * @return List of module data arrays (excluding header)
+     */
+    public List<String[]> getAllModules() {
+        List<String[]> data = FileUtil.readCSV(FILE_PATH);
+        if (data.size() <= 1) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(data.subList(1, data.size()));
+    }
+
+    /**
+     * Add a new module
+     * @param moduleId ID of the module
+     * @param moduleName Name of the module
+     * @param moduleLeader Student ID of the leader
+     * @return true if successful, false otherwise
+     */
+    public boolean addModule(String moduleId, String moduleName, String moduleLeader) {
+        if (moduleId == null || moduleId.isEmpty() || !moduleId.matches("M\\d{3}")) return false;
+        if (moduleName == null || moduleName.isEmpty()) return false;
+        if (moduleLeader == null || moduleLeader.isEmpty()) return false;
+        if (isModuleExists(moduleId)) return false;
+        if (!isValidMO(moduleLeader)) return false;
+
+        ensureHeader();
+        List<String[]> data = FileUtil.readCSV(FILE_PATH);
+        String creationDate = LocalDate.now().toString();
+        data.add(new String[]{moduleId, moduleName, moduleLeader, creationDate});
+        FileUtil.writeCSV(FILE_PATH, data);
+        return true;
+    }
+
+    /**
+     * Update an existing module
+     * @param moduleId ID of the module to update
+     * @param newName New name (optional)
+     * @param newLeader New leader (optional)
+     * @return true if successful, false otherwise
+     */
+    public boolean updateModule(String moduleId, String newName, String newLeader) {
+        List<String[]> data = FileUtil.readCSV(FILE_PATH);
+        boolean found = false;
+        for (int i = 1; i < data.size(); i++) {
+            String[] row = data.get(i);
+            if (row[0].equalsIgnoreCase(moduleId)) {
+                if (newName != null && !newName.isEmpty()) row[1] = newName;
+                if (newLeader != null && !newLeader.isEmpty()) {
+                    if (isValidMO(newLeader)) {
+                        row[2] = newLeader;
+                    } else {
+                        return false;
+                    }
+                }
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            FileUtil.writeCSV(FILE_PATH, data);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Delete a module by ID
+     * @param moduleId ID of the module to delete
+     * @return true if successful, false otherwise
+     */
+    public boolean deleteModule(String moduleId) {
+        List<String[]> data = FileUtil.readCSV(FILE_PATH);
+        int deleteIndex = -1;
+        for (int i = 1; i < data.size(); i++) {
+            if (data.get(i)[0].equalsIgnoreCase(moduleId)) {
+                deleteIndex = i;
+                break;
+            }
+        }
+        if (deleteIndex != -1) {
+            data.remove(deleteIndex);
+            FileUtil.writeCSV(FILE_PATH, data);
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Main entry for module creation and management
      * Handles user input and CSV persistence
@@ -348,15 +436,9 @@ public class ModuleService {
     }
 
     private boolean isValidMO(String studentId) {
-        List<String[]> users = FileUtil.readCSV("users.csv");
-        for (int i = 1; i < users.size(); i++) {
-            String[] user = users.get(i);
-            // Check if studentId exists in users.csv (Column 0) and has MO role (Column 8)
-            if (user.length >= 9 && user[0].equalsIgnoreCase(studentId)) {
-                return "MO".equalsIgnoreCase(user[8]);
-            }
-        }
-        return false;
+        auth.AuthService authService = new auth.AuthService();
+        String role = authService.getUserRole(studentId);
+        return "MO".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
     }
 
     /**
