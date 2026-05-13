@@ -1,4 +1,5 @@
 import gui.MainFrame;
+import gui.auth.LoginWindow;
 import javax.swing.SwingUtilities;
 
 public class Main {
@@ -9,6 +10,10 @@ public class Main {
             public void run() {
                 MainFrame frame = new MainFrame();
                 frame.setVisible(true);
+                
+                // 显示登录窗口
+                LoginWindow loginWindow = new LoginWindow(frame);
+                loginWindow.setVisible(true);
             }
         });
     }
