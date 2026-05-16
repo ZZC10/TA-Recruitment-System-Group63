@@ -1,28 +1,33 @@
 package gui.user;
 
 import gui.MainFrame;
-import gui.common.InputPanel;
 import gui.common.ButtonPanel;
 import gui.common.MessageDialog;
+import auth.AuthService;
+import user.UserService;
+import common.FileUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 public class ProfileWindow extends JPanel {
 
     private MainFrame mainFrame;
-    private InputPanel studentIdPanel;
-    private InputPanel namePanel;
-    private InputPanel emailPanel;
-    private InputPanel majorPanel;
-    private InputPanel rolePanel;
-    private JLabel titleLabel;
+    private String currentUserId;
+    private JTextField userIdField;
+    private JTextField nameField;
+    private JTextField emailField;
+    private JTextField majorField;
+    private JTextField roleField;
 
-    public ProfileWindow(MainFrame mainFrame) {
+    public ProfileWindow(MainFrame mainFrame, String currentUserId) {
         this.mainFrame = mainFrame;
+        this.currentUserId = currentUserId;
         initialize();
+        loadUserInfo();
     }
 
     private void initialize() {
@@ -30,112 +35,143 @@ public class ProfileWindow extends JPanel {
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
 
-        JPanel topPanel = createTopPanel();
-        add(topPanel, BorderLayout.NORTH);
-
-        JPanel centerPanel = createCenterPanel();
-        add(centerPanel, BorderLayout.CENTER);
-
-        JPanel bottomPanel = createBottomPanel();
-        add(bottomPanel, BorderLayout.SOUTH);
-    }
-
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBackground(Color.WHITE);
-
-        titleLabel = new JLabel("Personal Information");
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBackground(Color.WHITE);
+        JLabel titleLabel = new JLabel("Personal Information");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(51, 102, 153));
-        panel.add(titleLabel);
+        topPanel.add(titleLabel);
+        add(topPanel, BorderLayout.NORTH);
 
-        return panel;
-    }
+        JPanel centerPanel = new JPanel(new GridLayout(5, 2, 10, 10));
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
-    private JPanel createCenterPanel() {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.anchor = GridBagConstraints.WEST;
+        Font labelFont = new Font("Arial", Font.PLAIN, 14);
+        Font fieldFont = new Font("Arial", Font.PLAIN, 14);
 
-        studentIdPanel = new InputPanel("Student ID:", 20);
-        studentIdPanel.getTextField().setEditable(false);
-        studentIdPanel.getTextField().setBackground(new Color(240, 240, 240));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(studentIdPanel, gbc);
+        centerPanel.add(createLabel("User ID:", labelFont));
+        userIdField = createTextField(fieldFont, false);
+        centerPanel.add(userIdField);
 
-        namePanel = new InputPanel("Name:", 20);
-        namePanel.getTextField().setEditable(false);
-        namePanel.getTextField().setBackground(new Color(240, 240, 240));
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(namePanel, gbc);
+        centerPanel.add(createLabel("Name:", labelFont));
+        nameField = createTextField(fieldFont, false);
+        centerPanel.add(nameField);
 
-        emailPanel = new InputPanel("Email:", 20);
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(emailPanel, gbc);
+        centerPanel.add(createLabel("Email:", labelFont));
+        emailField = createTextField(fieldFont, true);
+        centerPanel.add(emailField);
 
-        majorPanel = new InputPanel("Major:", 20);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(majorPanel, gbc);
+        centerPanel.add(createLabel("Major:", labelFont));
+        majorField = createTextField(fieldFont, true);
+        centerPanel.add(majorField);
 
-        rolePanel = new InputPanel("Role:", 20);
-        rolePanel.getTextField().setEditable(false);
-        rolePanel.getTextField().setBackground(new Color(240, 240, 240));
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        panel.add(rolePanel, gbc);
+        centerPanel.add(createLabel("Role:", labelFont));
+        roleField = createTextField(fieldFont, false);
+        centerPanel.add(roleField);
 
-        return panel;
-    }
+        add(centerPanel, BorderLayout.CENTER);
 
-    private JPanel createBottomPanel() {
         ButtonPanel buttonPanel = new ButtonPanel();
-
         buttonPanel.addPrimaryButton("Save Changes", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 saveProfile();
             }
         });
-
         buttonPanel.addButton("Back", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 goBack();
             }
         });
-
-        return buttonPanel;
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    public void loadUserInfo(String studentId, String name, String email, String major, String role) {
-        studentIdPanel.setText(studentId != null ? studentId : "");
-        namePanel.setText(name != null ? name : "");
-        emailPanel.setText(email != null ? email : "");
-        majorPanel.setText(major != null ? major : "");
-        rolePanel.setText(role != null ? role : "");
+    private JLabel createLabel(String text, Font font) {
+        JLabel label = new JLabel(text);
+        label.setFont(font);
+        label.setPreferredSize(new Dimension(100, 30));
+        return label;
+    }
+
+    private JTextField createTextField(Font font, boolean editable) {
+        JTextField field = new JTextField(20);
+        field.setFont(font);
+        field.setEditable(editable);
+        field.setPreferredSize(new Dimension(250, 30));
+        if (!editable) {
+            field.setBackground(new Color(240, 240, 240));
+        }
+        return field;
+    }
+
+    private void loadUserInfo() {
+        AuthService authService = new AuthService();
+        UserService userService = new UserService();
+
+        String name = authService.getUserName(currentUserId);
+        String role = authService.getUserRole(currentUserId);
+        
+        String[] user = userService.getUserByUserId(currentUserId);
+        String email = "";
+        String major = "";
+        
+        if (user != null && user.length > 3) {
+            email = user[3];
+        }
+        if (user != null && user.length > 4) {
+            major = user[4];
+        }
+
+        userIdField.setText(currentUserId != null ? currentUserId : "");
+        nameField.setText(name != null ? name : "");
+        emailField.setText(email != null ? email : "");
+        majorField.setText(major != null ? major : "");
+        roleField.setText(role != null ? role : "");
     }
 
     private void saveProfile() {
-        String email = emailPanel.getText();
-        String major = majorPanel.getText();
+        String email = emailField.getText().trim();
+        String major = majorField.getText().trim();
 
         if (email.isEmpty() || major.isEmpty()) {
             MessageDialog.showWarning(this, "Warning", "Email and Major cannot be empty!");
             return;
         }
 
-        MessageDialog.showSuccess(this, "Profile updated successfully!");
+        try {
+            List<String[]> users = FileUtil.readCSV("../users.csv");
+            boolean found = false;
+
+            for (int i = 1; i < users.size(); i++) {
+                String[] user = users.get(i);
+                if (user.length > 0 && user[0].equals(currentUserId)) {
+                    found = true;
+                    String[] updatedUser = new String[6];
+                    updatedUser[0] = user[0];
+                    updatedUser[1] = user[1];
+                    updatedUser[2] = user[2];
+                    updatedUser[3] = email;
+                    updatedUser[4] = major;
+                    updatedUser[5] = user.length > 5 ? user[5] : "TA";
+                    users.set(i, updatedUser);
+                    break;
+                }
+            }
+
+            if (found) {
+                FileUtil.writeCSV("../users.csv", users);
+                MessageDialog.showSuccess(this, "Profile updated successfully!");
+            } else {
+                MessageDialog.showError(this, "Error", "User not found!");
+            }
+        } catch (Exception e) {
+            MessageDialog.showError(this, "Error", "Failed to update profile: " + e.getMessage());
+        }
     }
 
     private void goBack() {
-        mainFrame.showWelcomePanel();
+        mainFrame.showTAMenu();
     }
 }

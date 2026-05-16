@@ -9,19 +9,20 @@ public class InputPanel extends JPanel {
     private JTextField textField;
     
     public InputPanel(String labelText, int columns) {
-        setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        setLayout(new BorderLayout(10, 5));
         setBackground(Color.WHITE);
         
         label = new JLabel(labelText);
         label.setFont(new Font("Arial", Font.PLAIN, 14));
-        label.setPreferredSize(new Dimension(150, 25));
+        label.setPreferredSize(new Dimension(350, 30));
+        label.setVerticalAlignment(SwingConstants.CENTER);
         
         textField = new JTextField(columns);
         textField.setFont(new Font("Arial", Font.PLAIN, 14));
-        textField.setPreferredSize(new Dimension(300, 30));
+        textField.setPreferredSize(new Dimension(250, 30));
         
-        add(label);
-        add(textField);
+        add(label, BorderLayout.WEST);
+        add(textField, BorderLayout.CENTER);
     }
     
     public String getText() {
@@ -34,5 +35,9 @@ public class InputPanel extends JPanel {
     
     public JTextField getTextField() {
         return textField;
+    }
+
+    public JLabel getLabel() {
+        return label;
     }
 }

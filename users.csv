@@ -1,4 +1,7 @@
-studentId,name,password,email,major
-2023001,张三,123456,zhangsan@example.com,计算机科学
-2023002,李四,123456,lisi@example.com,软件工程
-2023003,王五,123456,wangwu@example.com,人工智能
+studentId,name,password,email,major,role
+2023001,Zhang San,123456,zhangsan@example.com,Computer Science,TA
+2023002,Li Si,123456,lisi@example.com,Software Engineering,TA
+2023003,Wang Wu,123456,wangwu@example.com,Artificial Intelligence,TA
+MO001,Prof.Li,mo123456,professor@example.com,Computer Science,MO
+ADMIN001,Admin,admin123456,admin@example.com,Administration,ADMIN
+2023050,SSS,PP1234,,,TA

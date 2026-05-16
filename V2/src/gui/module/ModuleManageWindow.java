@@ -1,5 +1,6 @@
 package gui.module;
 
+import gui.MainFrame;
 import gui.common.ButtonPanel;
 import gui.common.InputPanel;
 import gui.common.MessageDialog;
@@ -17,10 +18,11 @@ public class ModuleManageWindow extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField searchField;
     private JComboBox<String> searchTypeCombo;
+    private MainFrame mainFrame;
 
-    public ModuleManageWindow() {
+    public ModuleManageWindow(MainFrame mainFrame) {
+        this.mainFrame = mainFrame;
         this.moduleService = new ModuleService();
-        // Set current role to ADMIN for permission check in ModuleService
         this.moduleService.setCurrentRole("ADMIN");
         
         setLayout(new BorderLayout(10, 10));
@@ -32,13 +34,29 @@ public class ModuleManageWindow extends JPanel {
     }
 
     private void initComponents() {
-        // Top Panel: Title and Search
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(Color.WHITE);
 
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setBackground(Color.WHITE);
+        
+        JButton backBtn = new JButton("Back");
+        backBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+        backBtn.setPreferredSize(new Dimension(80, 35));
+        backBtn.setBackground(new Color(102, 102, 102));
+        backBtn.setForeground(Color.WHITE);
+        backBtn.setFocusPainted(false);
+        backBtn.setBorderPainted(false);
+        backBtn.setOpaque(true);
+        backBtn.addActionListener(e -> mainFrame.showAdminMenu());
+        leftPanel.add(backBtn);
+        
         JLabel titleLabel = new JLabel("Module Management");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        topPanel.add(titleLabel, BorderLayout.WEST);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        leftPanel.add(titleLabel);
+        
+        topPanel.add(leftPanel, BorderLayout.WEST);
 
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchPanel.setBackground(Color.WHITE);
@@ -55,7 +73,6 @@ public class ModuleManageWindow extends JPanel {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // Center Panel: Table
         String[] columnNames = {"Module ID", "Module Name", "Leader ID", "Creation Date"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -71,7 +88,6 @@ public class ModuleManageWindow extends JPanel {
         JScrollPane scrollPane = new JScrollPane(moduleTable);
         add(scrollPane, BorderLayout.CENTER);
 
-        // Bottom Panel: Actions
         ButtonPanel actionPanel = new ButtonPanel();
         actionPanel.addButton("Refresh", e -> refreshTable());
         actionPanel.addButton("View Details", e -> showDetails());
@@ -97,7 +113,7 @@ public class ModuleManageWindow extends JPanel {
             return;
         }
 
-        int searchType = searchTypeCombo.getSelectedIndex(); // 0: Name, 1: Leader
+        int searchType = searchTypeCombo.getSelectedIndex();
         tableModel.setRowCount(0);
         List<String[]> modules = moduleService.getAllModules();
         for (String[] module : modules) {
@@ -126,7 +142,7 @@ public class ModuleManageWindow extends JPanel {
 
         InputPanel idPanel = new InputPanel("Module ID (Mxxx):", 20);
         InputPanel namePanel = new InputPanel("Module Name:", 20);
-        InputPanel leaderPanel = new InputPanel("Leader ID (Student ID):", 20);
+        InputPanel leaderPanel = new InputPanel("Leader ID (User ID):", 20);
 
         content.add(idPanel);
         content.add(namePanel);
