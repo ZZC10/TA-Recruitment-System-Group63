@@ -1,5 +1,6 @@
 package gui.position;
 
+import gui.MainFrame;
 import application.ApplicationService;
 import common.FileUtil;
 import gui.common.ButtonPanel;
@@ -23,11 +24,11 @@ public class MOWorkbenchWindow extends JPanel {
     private DefaultTableModel applicantTableModel;
 
     private List<String> moModuleIds;
-    private JFrame parentFrame;
+    private MainFrame mainFrame;
     private String currentUserId;
 
-    public MOWorkbenchWindow(JFrame parentFrame, String currentUserId) {
-        this.parentFrame = parentFrame;
+    public MOWorkbenchWindow(MainFrame mainFrame, String currentUserId) {
+        this.mainFrame = mainFrame;
         this.currentUserId = currentUserId;
         this.moduleService = new ModuleService();
         this.applicationService = new ApplicationService();
@@ -41,19 +42,39 @@ public class MOWorkbenchWindow extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         setBackground(Color.WHITE);
 
-        JLabel titleLabel = new JLabel("MO Workbench - View and Manage Applications");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        add(titleLabel, BorderLayout.NORTH);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
+        
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setBackground(Color.WHITE);
+        
+        JButton backBtn = new JButton("Back");
+        backBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+        backBtn.setPreferredSize(new Dimension(80, 35));
+        backBtn.setBackground(new Color(102, 102, 102));
+        backBtn.setForeground(Color.WHITE);
+        backBtn.setFocusPainted(false);
+        backBtn.setBorderPainted(false);
+        backBtn.setOpaque(true);
+        backBtn.addActionListener(e -> mainFrame.showMOMenu());
+        leftPanel.add(backBtn);
+        
+        JLabel titleLabel = new JLabel("MO Workbench - Manage Applications");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 15, 0));
+        leftPanel.add(titleLabel);
+        
+        topPanel.add(leftPanel, BorderLayout.WEST);
+        add(topPanel, BorderLayout.NORTH);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 0));
         mainPanel.setBackground(Color.WHITE);
 
-        JPanel leftPanel = createJobListPanel();
-        mainPanel.add(leftPanel, BorderLayout.WEST);
+        JPanel leftJobPanel = createJobListPanel();
+        mainPanel.add(leftJobPanel, BorderLayout.WEST);
 
-        JPanel rightPanel = createApplicantListPanel();
-        mainPanel.add(rightPanel, BorderLayout.CENTER);
+        JPanel rightApplicantPanel = createApplicantListPanel();
+        mainPanel.add(rightApplicantPanel, BorderLayout.CENTER);
 
         add(mainPanel, BorderLayout.CENTER);
     }
@@ -73,6 +94,8 @@ public class MOWorkbenchWindow extends JPanel {
         };
         jobTable = new JTable(jobTableModel);
         jobTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jobTable.setRowHeight(25);
+        jobTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         jobTable.getColumnModel().getColumn(0).setPreferredWidth(60);
         jobTable.getColumnModel().getColumn(1).setPreferredWidth(200);
         jobTable.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -94,7 +117,7 @@ public class MOWorkbenchWindow extends JPanel {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createTitledBorder("Applicants"));
 
-        String[] columnNames = {"Student ID", "Status", "Apply Date"};
+        String[] columnNames = {"User ID", "Status", "Apply Date"};
         applicantTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -102,6 +125,8 @@ public class MOWorkbenchWindow extends JPanel {
             }
         };
         applicantTable = new JTable(applicantTableModel);
+        applicantTable.setRowHeight(25);
+        applicantTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         applicantTable.getColumnModel().getColumn(0).setPreferredWidth(100);
         applicantTable.getColumnModel().getColumn(1).setPreferredWidth(80);
         applicantTable.getColumnModel().getColumn(2).setPreferredWidth(120);
@@ -109,14 +134,26 @@ public class MOWorkbenchWindow extends JPanel {
         JScrollPane scrollPane = new JScrollPane(applicantTable);
         panel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
         buttonPanel.setBackground(Color.WHITE);
+
+        JButton viewDetailsButton = new JButton("View Details");
+        viewDetailsButton.setPreferredSize(new Dimension(120, 35));
+        viewDetailsButton.setBackground(new Color(51, 102, 153));
+        viewDetailsButton.setForeground(Color.WHITE);
+        viewDetailsButton.setFocusPainted(false);
+        viewDetailsButton.setBorderPainted(false);
+        viewDetailsButton.setOpaque(true);
+        viewDetailsButton.addActionListener(e -> viewApplicantDetails());
+        buttonPanel.add(viewDetailsButton);
 
         JButton approveButton = new JButton("Approve");
         approveButton.setPreferredSize(new Dimension(120, 35));
         approveButton.setBackground(new Color(0, 153, 51));
         approveButton.setForeground(Color.WHITE);
         approveButton.setFocusPainted(false);
+        approveButton.setBorderPainted(false);
+        approveButton.setOpaque(true);
         approveButton.addActionListener(e -> approveApplication());
         buttonPanel.add(approveButton);
 
@@ -125,6 +162,8 @@ public class MOWorkbenchWindow extends JPanel {
         rejectButton.setBackground(new Color(204, 0, 0));
         rejectButton.setForeground(Color.WHITE);
         rejectButton.setFocusPainted(false);
+        rejectButton.setBorderPainted(false);
+        rejectButton.setOpaque(true);
         rejectButton.addActionListener(e -> rejectApplication());
         buttonPanel.add(rejectButton);
 
@@ -137,14 +176,14 @@ public class MOWorkbenchWindow extends JPanel {
         jobTableModel.setRowCount(0);
         moModuleIds.clear();
 
-        List<String[]> modules = FileUtil.readCSV("modules.csv");
+        List<String[]> modules = FileUtil.readCSV("../modules.csv");
         for (String[] module : modules) {
             if (module.length > 2 && module[2].equals(currentUserId)) {
                 moModuleIds.add(module[0]);
             }
         }
 
-        List<String[]> jobs = FileUtil.readCSV("jobs.csv");
+        List<String[]> jobs = FileUtil.readCSV("../jobs.csv");
         for (String[] job : jobs) {
             if (job.length > 3 && moModuleIds.contains(job[3])) {
                 jobTableModel.addRow(new Object[]{job[0], job[1], job[3]});
@@ -160,7 +199,7 @@ public class MOWorkbenchWindow extends JPanel {
 
         String jobId = (String) jobTableModel.getValueAt(selectedRow, 0);
 
-        List<String[]> applications = FileUtil.readCSV("applications.csv");
+        List<String[]> applications = FileUtil.readCSV("../applications.csv");
         for (String[] app : applications) {
             if (app.length > 1 && app[1].equals(jobId)) {
                 String status = app.length > 2 ? app[2] : "PENDING";
@@ -170,45 +209,90 @@ public class MOWorkbenchWindow extends JPanel {
         }
     }
 
-    private void approveApplication() {
+    private void viewApplicantDetails() {
         int selectedRow = applicantTable.getSelectedRow();
         if (selectedRow < 0) {
-            MessageDialog.showWarning(parentFrame, "No Selection", "Please select an applicant first!");
+            MessageDialog.showWarning(mainFrame, "No Selection", "Please select an applicant first!");
             return;
         }
 
-        String studentId = (String) applicantTableModel.getValueAt(selectedRow, 0);
+        String userId = (String) applicantTableModel.getValueAt(selectedRow, 0);
+        
+        List<String[]> users = FileUtil.readCSV("../users.csv");
+        String name = "";
+        String email = "";
+        String major = "";
+        String intention = "";
+        String experience = "";
+        String skills = "";
+        String role = "";
+
+        for (String[] user : users) {
+            if (user.length > 0 && user[0].equals(userId)) {
+                name = user.length > 1 ? user[1] : "";
+                email = user.length > 3 ? user[3] : "";
+                major = user.length > 4 ? user[4] : "";
+                intention = user.length > 5 ? user[5] : "";
+                experience = user.length > 6 ? user[6] : "";
+                skills = user.length > 7 ? user[7] : "";
+                role = user.length > 8 ? user[8] : "";
+                break;
+            }
+        }
+
+        StringBuilder details = new StringBuilder();
+        details.append("User ID: ").append(userId).append("\n");
+        details.append("Name: ").append(name).append("\n");
+        details.append("Email: ").append(email).append("\n");
+        details.append("Major: ").append(major).append("\n");
+        details.append("Role: ").append(role).append("\n\n");
+        details.append("===== CV Information =====\n");
+        details.append("Intention: ").append(intention.isEmpty() ? "Not provided" : intention).append("\n");
+        details.append("Experience: ").append(experience.isEmpty() ? "Not provided" : experience).append("\n");
+        details.append("Skills: ").append(skills.isEmpty() ? "Not provided" : skills);
+
+        MessageDialog.showInfo(mainFrame, "Applicant Details", details.toString());
+    }
+
+    private void approveApplication() {
+        int selectedRow = applicantTable.getSelectedRow();
+        if (selectedRow < 0) {
+            MessageDialog.showWarning(mainFrame, "No Selection", "Please select an applicant first!");
+            return;
+        }
+
+        String userId = (String) applicantTableModel.getValueAt(selectedRow, 0);
         int selectedJobRow = jobTable.getSelectedRow();
         if (selectedJobRow < 0) return;
         String jobId = (String) jobTableModel.getValueAt(selectedJobRow, 0);
 
-        boolean success = applicationService.approveApplication(studentId, jobId, true);
+        boolean success = applicationService.approveApplication(userId, jobId, true);
         if (success) {
-            MessageDialog.showSuccess(parentFrame, "Success", "Application approved successfully!");
+            MessageDialog.showSuccess(mainFrame, "Success", "Application approved successfully!");
             loadApplicants();
         } else {
-            MessageDialog.showError(parentFrame, "Error", "Failed to approve application.");
+            MessageDialog.showError(mainFrame, "Error", "Failed to approve application.");
         }
     }
 
     private void rejectApplication() {
         int selectedRow = applicantTable.getSelectedRow();
         if (selectedRow < 0) {
-            MessageDialog.showWarning(parentFrame, "No Selection", "Please select an applicant first!");
+            MessageDialog.showWarning(mainFrame, "No Selection", "Please select an applicant first!");
             return;
         }
 
-        String studentId = (String) applicantTableModel.getValueAt(selectedRow, 0);
+        String userId = (String) applicantTableModel.getValueAt(selectedRow, 0);
         int selectedJobRow = jobTable.getSelectedRow();
         if (selectedJobRow < 0) return;
         String jobId = (String) jobTableModel.getValueAt(selectedJobRow, 0);
 
-        boolean success = applicationService.approveApplication(studentId, jobId, false);
+        boolean success = applicationService.approveApplication(userId, jobId, false);
         if (success) {
-            MessageDialog.showSuccess(parentFrame, "Success", "Application rejected successfully!");
+            MessageDialog.showSuccess(mainFrame, "Success", "Application rejected successfully!");
             loadApplicants();
         } else {
-            MessageDialog.showError(parentFrame, "Error", "Failed to reject application.");
+            MessageDialog.showError(mainFrame, "Error", "Failed to reject application.");
         }
     }
 }

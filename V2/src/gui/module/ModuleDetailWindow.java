@@ -70,7 +70,7 @@ public class ModuleDetailWindow extends JDialog {
         jobsTable.setRowHeight(22);
         
         // Load associated jobs from jobs.csv
-        List<String[]> allJobs = FileUtil.readCSV("jobs.csv");
+        List<String[]> allJobs = FileUtil.readCSV("../jobs.csv");
         int jobCount = 0;
         for (String[] job : allJobs) {
             // Index 3 is moduleId in jobs.csv based on V1 standards

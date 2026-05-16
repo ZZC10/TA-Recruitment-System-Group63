@@ -13,7 +13,7 @@ public class LoginWindow extends JDialog {
     private MainFrame mainFrame;
     private AuthService authService;
 
-    private JTextField studentIdField;
+    private JTextField userIdField;
     private JPasswordField passwordField;
     private JComboBox<String> roleComboBox;
     private JButton loginButton;
@@ -51,14 +51,14 @@ public class LoginWindow extends JDialog {
 
         gbc.gridwidth = 1;
         gbc.gridy = 1;
-        JLabel idLabel = new JLabel("Student ID:");
+        JLabel idLabel = new JLabel("User ID:");
         idLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         mainPanel.add(idLabel, gbc);
 
         gbc.gridx = 1;
-        studentIdField = new JTextField(15);
-        studentIdField.setFont(new Font("Arial", Font.PLAIN, 14));
-        mainPanel.add(studentIdField, gbc);
+        userIdField = new JTextField(15);
+        userIdField.setFont(new Font("Arial", Font.PLAIN, 14));
+        mainPanel.add(userIdField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -123,19 +123,19 @@ public class LoginWindow extends JDialog {
     private class LoginAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String studentId = studentIdField.getText().trim();
+            String userId = userIdField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
             String selectedRole = (String) roleComboBox.getSelectedItem();
 
-            if (studentId.isEmpty() || password.isEmpty()) {
-                messageLabel.setText("Please enter both Student ID and Password");
+            if (userId.isEmpty() || password.isEmpty()) {
+                messageLabel.setText("Please enter both User ID and Password");
                 return;
             }
 
             try {
-                boolean loginSuccess = authService.login(studentId, password);
+                boolean loginSuccess = authService.login(userId, password);
                 if (loginSuccess) {
-                    String actualRole = authService.getUserRole(studentId);
+                    String actualRole = authService.getUserRole(userId);
 
                     if (!actualRole.equals(selectedRole)) {
                         messageLabel.setText("Role mismatch! You are a " + actualRole);
@@ -143,16 +143,16 @@ public class LoginWindow extends JDialog {
                     }
 
                     messageLabel.setText("");
-                    mainFrame.setCurrentUser(studentId, actualRole);
+                    mainFrame.setCurrentUser(userId, actualRole);
                     dispose();
 
                     JOptionPane.showMessageDialog(mainFrame,
-                        "Welcome " + studentId + "!\nRole: " + actualRole,
+                        "Welcome " + authService.getUserName(userId) + "!\nRole: " + actualRole,
                         "Login Success",
                         JOptionPane.INFORMATION_MESSAGE);
 
                 } else {
-                    messageLabel.setText("Invalid Student ID or Password");
+                    messageLabel.setText("Invalid User ID or Password");
                 }
             } catch (Exception ex) {
                 messageLabel.setText("Login error: " + ex.getMessage());

@@ -1,5 +1,6 @@
 package gui.position;
 
+import gui.MainFrame;
 import common.FileUtil;
 import gui.common.ButtonPanel;
 import gui.common.InputPanel;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class PublishJobWindow extends JPanel {
     private PositionService positionService;
-    private JFrame parentFrame;
+    private MainFrame mainFrame;
     private String currentUserId;
 
     private JComboBox<String> moduleComboBox;
@@ -21,8 +22,8 @@ public class PublishJobWindow extends JPanel {
     private InputPanel requirementsInput;
     private JTextArea descriptionArea;
 
-    public PublishJobWindow(JFrame parentFrame, String currentUserId) {
-        this.parentFrame = parentFrame;
+    public PublishJobWindow(MainFrame mainFrame, String currentUserId) {
+        this.mainFrame = mainFrame;
         this.currentUserId = currentUserId;
         this.positionService = new PositionService();
         this.positionService.setCurrentUserId(currentUserId);
@@ -34,10 +35,30 @@ public class PublishJobWindow extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setBackground(Color.WHITE);
 
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
+        
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setBackground(Color.WHITE);
+        
+        JButton backBtn = new JButton("Back");
+        backBtn.setFont(new Font("Arial", Font.PLAIN, 14));
+        backBtn.setPreferredSize(new Dimension(80, 35));
+        backBtn.setBackground(new Color(102, 102, 102));
+        backBtn.setForeground(Color.WHITE);
+        backBtn.setFocusPainted(false);
+        backBtn.setBorderPainted(false);
+        backBtn.setOpaque(true);
+        backBtn.addActionListener(e -> mainFrame.showMOMenu());
+        leftPanel.add(backBtn);
+        
         JLabel titleLabel = new JLabel("Publish New Job Position");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 0));
+        leftPanel.add(titleLabel);
+        
+        topPanel.add(leftPanel, BorderLayout.WEST);
+        add(topPanel, BorderLayout.NORTH);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
@@ -133,7 +154,7 @@ public class PublishJobWindow extends JPanel {
 
     private void loadModules() {
         moduleComboBox.removeAllItems();
-        List<String[]> modules = FileUtil.readCSV("modules.csv");
+        List<String[]> modules = FileUtil.readCSV("../modules.csv");
         for (String[] module : modules) {
             if (module.length > 2 && module[2].equals(currentUserId)) {
                 moduleComboBox.addItem(module[0] + " - " + module[1]);
@@ -144,7 +165,7 @@ public class PublishJobWindow extends JPanel {
     private void publishJob() {
         String selectedModule = (String) moduleComboBox.getSelectedItem();
         if (selectedModule == null) {
-            MessageDialog.showWarning(parentFrame, "No Selection", "Please select a module first!");
+            MessageDialog.showWarning(mainFrame, "No Selection", "Please select a module first!");
             return;
         }
 
@@ -155,7 +176,7 @@ public class PublishJobWindow extends JPanel {
         String description = descriptionArea.getText();
 
         if (title.isEmpty() || hours.isEmpty() || requirements.isEmpty()) {
-            MessageDialog.showWarning(parentFrame, "Missing Information", "Please fill in all required fields!");
+            MessageDialog.showWarning(mainFrame, "Missing Information", "Please fill in all required fields!");
             return;
         }
 
@@ -164,13 +185,13 @@ public class PublishJobWindow extends JPanel {
             boolean success = positionService.publishJob(moduleId, title, hoursInt, requirements, description);
 
             if (success) {
-                MessageDialog.showSuccess(parentFrame, "Success", "Job published successfully!");
+                MessageDialog.showSuccess(mainFrame, "Success", "Job published successfully!");
                 clearForm();
             } else {
-                MessageDialog.showError(parentFrame, "Error", "Failed to publish job.");
+                MessageDialog.showError(mainFrame, "Error", "Failed to publish job.");
             }
         } catch (NumberFormatException ex) {
-            MessageDialog.showError(parentFrame, "Invalid Input", "Working hours must be a number!");
+            MessageDialog.showError(mainFrame, "Invalid Input", "Working hours must be a number!");
         }
     }
 

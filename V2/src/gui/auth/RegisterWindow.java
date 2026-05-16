@@ -10,9 +10,8 @@ import java.awt.event.ActionListener;
 public class RegisterWindow extends JDialog {
 
     private AuthService authService;
-    private LoginWindow loginWindow;
 
-    private JTextField studentIdField;
+    private JTextField userIdField;
     private JPasswordField passwordField;
     private JTextField nameField;
     private JComboBox<String> roleComboBox;
@@ -20,9 +19,14 @@ public class RegisterWindow extends JDialog {
     private JButton cancelButton;
     private JLabel messageLabel;
 
-    public RegisterWindow(LoginWindow parent) {
+    public RegisterWindow(JDialog parent) {
         super(parent, "Register - TA Recruitment System", true);
-        this.loginWindow = parent;
+        this.authService = new AuthService();
+        initialize();
+    }
+
+    public RegisterWindow(JFrame parent) {
+        super(parent, "Register - TA Recruitment System", true);
         this.authService = new AuthService();
         initialize();
     }
@@ -51,14 +55,14 @@ public class RegisterWindow extends JDialog {
 
         gbc.gridwidth = 1;
         gbc.gridy = 1;
-        JLabel idLabel = new JLabel("Student ID:");
+        JLabel idLabel = new JLabel("User ID:");
         idLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         mainPanel.add(idLabel, gbc);
 
         gbc.gridx = 1;
-        studentIdField = new JTextField(15);
-        studentIdField.setFont(new Font("Arial", Font.PLAIN, 14));
-        mainPanel.add(studentIdField, gbc);
+        userIdField = new JTextField(15);
+        userIdField.setFont(new Font("Arial", Font.PLAIN, 14));
+        mainPanel.add(userIdField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
@@ -89,7 +93,7 @@ public class RegisterWindow extends JDialog {
         mainPanel.add(roleLabel, gbc);
 
         gbc.gridx = 1;
-        String[] roles = {"TA", "MO", "ADMIN"};
+        String[] roles = {"TA", "MO"};
         roleComboBox = new JComboBox<>(roles);
         roleComboBox.setFont(new Font("Arial", Font.PLAIN, 14));
         mainPanel.add(roleComboBox, gbc);
@@ -134,13 +138,13 @@ public class RegisterWindow extends JDialog {
     private class RegisterAction implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String studentId = studentIdField.getText().trim();
+            String userId = userIdField.getText().trim();
             String password = new String(passwordField.getPassword()).trim();
             String name = nameField.getText().trim();
             String role = (String) roleComboBox.getSelectedItem();
 
-            if (studentId.isEmpty()) {
-                messageLabel.setText("Please enter Student ID");
+            if (userId.isEmpty()) {
+                messageLabel.setText("Please enter User ID");
                 return;
             }
 
@@ -160,18 +164,18 @@ public class RegisterWindow extends JDialog {
             }
 
             try {
-                boolean loginSuccess = authService.login(studentId, password);
+                boolean loginSuccess = authService.login(userId, password);
                 if (loginSuccess) {
-                    messageLabel.setText("Student ID already exists!");
+                    messageLabel.setText("User ID already exists!");
                     return;
                 }
 
-                boolean success = authService.register(studentId, password, name, role);
+                boolean success = authService.register(userId, password, name, role);
 
                 if (success) {
                     messageLabel.setText("");
                     JOptionPane.showMessageDialog(RegisterWindow.this,
-                        "Registration Successful!\nStudent ID: " + studentId + "\nRole: " + role,
+                        "Registration Successful!\nUser ID: " + userId + "\nRole: " + role,
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE);
                     dispose();

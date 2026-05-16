@@ -16,6 +16,7 @@ import java.io.File;
 public class CVUploadWindow extends JPanel {
 
     private MainFrame mainFrame;
+    private String currentUserId;
     private InputPanel intentionPanel;
     private InputPanel experiencePanel;
     private InputPanel skillsPanel;
@@ -24,8 +25,9 @@ public class CVUploadWindow extends JPanel {
     private JLabel previewLabel;
     private File selectedFile;
 
-    public CVUploadWindow(MainFrame mainFrame) {
+    public CVUploadWindow(MainFrame mainFrame, String currentUserId) {
         this.mainFrame = mainFrame;
+        this.currentUserId = currentUserId;
         initialize();
     }
 
@@ -240,6 +242,6 @@ public class CVUploadWindow extends JPanel {
     }
 
     private void goBack() {
-        mainFrame.showWelcomePanel();
+        mainFrame.showTAMenu();
     }
 }
