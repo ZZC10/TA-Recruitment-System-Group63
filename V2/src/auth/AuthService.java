@@ -56,7 +56,7 @@ public class AuthService {
             }
         }
 
-        String[] newUser = {userId, name, password, "", "", role};
+        String[] newUser = {userId, name, password, "", "", role, "", "", ""};
         users.add(newUser);
 
         FileUtil.writeCSV(USERS_FILE, users);
