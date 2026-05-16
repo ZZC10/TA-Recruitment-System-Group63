@@ -4,14 +4,14 @@ import gui.MainFrame;
 import gui.common.InputPanel;
 import gui.common.ButtonPanel;
 import gui.common.MessageDialog;
+import common.FileUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.util.List;
 
 public class CVUploadWindow extends JPanel {
 
@@ -20,15 +20,12 @@ public class CVUploadWindow extends JPanel {
     private InputPanel intentionPanel;
     private InputPanel experiencePanel;
     private InputPanel skillsPanel;
-    private JLabel fileLabel;
-    private JProgressBar progressBar;
-    private JLabel previewLabel;
-    private File selectedFile;
 
     public CVUploadWindow(MainFrame mainFrame, String currentUserId) {
         this.mainFrame = mainFrame;
         this.currentUserId = currentUserId;
         initialize();
+        loadCVInfo();
     }
 
     private void initialize() {
@@ -39,17 +36,8 @@ public class CVUploadWindow extends JPanel {
         JPanel topPanel = createTopPanel();
         add(topPanel, BorderLayout.NORTH);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPane.setResizeWeight(0.6);
-        splitPane.setBorder(null);
-
-        JPanel upperPanel = createUpperPanel();
-        splitPane.setTopComponent(upperPanel);
-
-        JPanel lowerPanel = createLowerPanel();
-        splitPane.setBottomComponent(lowerPanel);
-
-        add(splitPane, BorderLayout.CENTER);
+        JPanel centerPanel = createCenterPanel();
+        add(centerPanel, BorderLayout.CENTER);
 
         JPanel bottomPanel = createBottomPanel();
         add(bottomPanel, BorderLayout.SOUTH);
@@ -59,7 +47,7 @@ public class CVUploadWindow extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBackground(Color.WHITE);
 
-        JLabel titleLabel = new JLabel("Upload / Update CV");
+        JLabel titleLabel = new JLabel("Edit CV");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 28));
         titleLabel.setForeground(new Color(51, 102, 153));
         panel.add(titleLabel);
@@ -67,7 +55,7 @@ public class CVUploadWindow extends JPanel {
         return panel;
     }
 
-    private JPanel createUpperPanel() {
+    private JPanel createCenterPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBackground(Color.WHITE);
         panel.setBorder(new TitledBorder(
@@ -106,72 +94,13 @@ public class CVUploadWindow extends JPanel {
         return panel;
     }
 
-    private JPanel createLowerPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new TitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            "File Upload",
-            TitledBorder.LEFT,
-            TitledBorder.TOP,
-            new Font("Arial", Font.BOLD, 14),
-            new Color(51, 102, 153)
-        ));
-
-        JPanel filePanel = new JPanel(new BorderLayout(10, 10));
-        filePanel.setBackground(Color.WHITE);
-        filePanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-
-        JPanel fileSelectPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        fileSelectPanel.setBackground(Color.WHITE);
-
-        JButton selectFileButton = new JButton("Select File");
-        selectFileButton.setFont(new Font("Arial", Font.PLAIN, 14));
-        selectFileButton.setPreferredSize(new Dimension(120, 35));
-        selectFileButton.setBackground(new Color(51, 102, 153));
-        selectFileButton.setForeground(Color.WHITE);
-        selectFileButton.setFocusPainted(false);
-        selectFileButton.setBorderPainted(false);
-        selectFileButton.setOpaque(true);
-        selectFileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectFile();
-            }
-        });
-
-        fileLabel = new JLabel("No file selected");
-        fileLabel.setFont(new Font("Arial", Font.PLAIN, 13));
-        fileLabel.setForeground(new Color(102, 102, 102));
-
-        fileSelectPanel.add(selectFileButton);
-        fileSelectPanel.add(fileLabel);
-
-        progressBar = new JProgressBar(0, 100);
-        progressBar.setStringPainted(true);
-        progressBar.setVisible(false);
-
-        previewLabel = new JLabel("<html><center><i>CV Preview Area</i></center></html>", SwingConstants.CENTER);
-        previewLabel.setFont(new Font("Arial", Font.ITALIC, 14));
-        previewLabel.setForeground(new Color(153, 153, 153));
-        previewLabel.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 220), 1));
-        previewLabel.setPreferredSize(new Dimension(0, 100));
-
-        filePanel.add(fileSelectPanel, BorderLayout.NORTH);
-        filePanel.add(progressBar, BorderLayout.CENTER);
-        filePanel.add(previewLabel, BorderLayout.SOUTH);
-
-        panel.add(filePanel, BorderLayout.CENTER);
-        return panel;
-    }
-
     private JPanel createBottomPanel() {
         ButtonPanel buttonPanel = new ButtonPanel();
 
-        buttonPanel.addPrimaryButton("Upload CV", new ActionListener() {
+        buttonPanel.addPrimaryButton("Save CV", new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                uploadCV();
+                saveCV();
             }
         });
 
@@ -185,60 +114,73 @@ public class CVUploadWindow extends JPanel {
         return buttonPanel;
     }
 
-    private void selectFile() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Select CV File");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Document Files (*.pdf, *.doc, *.docx)", "pdf", "doc", "docx"));
+    private void loadCVInfo() {
+        try {
+            List<String[]> users = FileUtil.readCSV("../users.csv");
 
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile();
-            fileLabel.setText(selectedFile.getName());
-            previewLabel.setText("<html><center><b>File selected:</b><br>" + selectedFile.getName() + "</center></html>");
-            previewLabel.setForeground(new Color(51, 102, 153));
+            for (int i = 1; i < users.size(); i++) {
+                String[] user = users.get(i);
+                if (user.length > 0 && user[0].equals(currentUserId)) {
+                    if (user.length > 6) {
+                        intentionPanel.setText(user[6]);
+                    }
+                    if (user.length > 7) {
+                        experiencePanel.setText(user[7]);
+                    }
+                    if (user.length > 8) {
+                        skillsPanel.setText(user[8]);
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void uploadCV() {
-        String intention = intentionPanel.getText();
-        String experience = experiencePanel.getText();
-        String skills = skillsPanel.getText();
+    private void saveCV() {
+        String intention = intentionPanel.getText().trim().replace(",", ";");
+        String experience = experiencePanel.getText().trim().replace(",", ";");
+        String skills = skillsPanel.getText().trim().replace(",", ";");
 
         if (intention.isEmpty() || experience.isEmpty() || skills.isEmpty()) {
             MessageDialog.showWarning(this, "Warning", "Please fill in all CV information fields!");
             return;
         }
 
-        progressBar.setVisible(true);
-        progressBar.setValue(0);
+        try {
+            List<String[]> users = FileUtil.readCSV("../users.csv");
+            boolean found = false;
 
-        Timer timer = new Timer(50, new ActionListener() {
-            int progress = 0;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                progress += 5;
-                progressBar.setValue(progress);
-                if (progress >= 100) {
-                    ((Timer) e.getSource()).stop();
-                    progressBar.setVisible(false);
-                    MessageDialog.showSuccess(CVUploadWindow.this, "CV uploaded successfully!");
-                    clearFields();
+            for (int i = 1; i < users.size(); i++) {
+                String[] user = users.get(i);
+                if (user.length > 0 && user[0].equals(currentUserId)) {
+                    found = true;
+                    String[] updatedUser = new String[9];
+                    for (int j = 0; j < Math.min(user.length, 9); j++) {
+                        updatedUser[j] = user[j];
+                    }
+                    for (int j = user.length; j < 9; j++) {
+                        updatedUser[j] = "";
+                    }
+                    updatedUser[6] = intention;
+                    updatedUser[7] = experience;
+                    updatedUser[8] = skills;
+                    users.set(i, updatedUser);
+                    break;
                 }
             }
-        });
-        timer.start();
-    }
 
-    private void clearFields() {
-        intentionPanel.setText("");
-        experiencePanel.setText("");
-        skillsPanel.setText("");
-        fileLabel.setText("No file selected");
-        previewLabel.setText("<html><center><i>CV Preview Area</i></center></html>");
-        previewLabel.setForeground(new Color(153, 153, 153));
-        selectedFile = null;
+            if (found) {
+                FileUtil.writeCSV("../users.csv", users);
+                MessageDialog.showSuccess(this, "CV saved successfully!");
+            } else {
+                MessageDialog.showError(this, "Error", "User not found!");
+            }
+        } catch (Exception e) {
+            MessageDialog.showError(this, "Error", "Failed to save CV: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void goBack() {

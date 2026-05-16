@@ -148,7 +148,13 @@ public class ProfileWindow extends JPanel {
                 String[] user = users.get(i);
                 if (user.length > 0 && user[0].equals(currentUserId)) {
                     found = true;
-                    String[] updatedUser = new String[6];
+                    String[] updatedUser = new String[9];
+                    for (int j = 0; j < Math.min(user.length, 9); j++) {
+                        updatedUser[j] = user[j];
+                    }
+                    for (int j = user.length; j < 9; j++) {
+                        updatedUser[j] = "";
+                    }
                     updatedUser[0] = user[0];
                     updatedUser[1] = user[1];
                     updatedUser[2] = user[2];

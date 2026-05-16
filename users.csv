@@ -1,5 +1,5 @@
-studentId,name,password,email,major,role
-2023001,Zhang San,123456,zhangsan@example.com,Computer Science,TA
+studentId,name,password,email,major,role,intention,experience,skills
+2023001,Zhang San,123456,zhangsan111@example.com,Computer Science,TA,112,111,111
 2023002,Li Si,123456,lisi@example.com,Software Engineering,TA
 2023003,Wang Wu,123456,wangwu@example.com,Artificial Intelligence,TA
 MO001,Prof.Li,mo123456,professor@example.com,Computer Science,MO
