@@ -77,4 +77,28 @@ public class PositionService {
         FileUtil.writeCSV("jobs.csv", existingJobs);
         System.out.println("Job published successfully!");
     }
+
+    public boolean publishJob(String moduleId, String title, int hours, String requirements, String description) {
+        if (!"MO".equals(authService.getUserRole(currentUserId)) && !"ADMIN".equals(authService.getUserRole(currentUserId))) {
+            System.out.println("Permission Denied: Only MO or ADMIN can publish jobs.");
+            return false;
+        }
+
+        if (moduleService.getModuleById(moduleId) == null) {
+            System.out.println("Error: Module ID " + moduleId + " does not exist.");
+            return false;
+        }
+
+        String jobId = "J" + System.currentTimeMillis() % 10000;
+        String[] newJob = {jobId, title, String.valueOf(hours), moduleId, requirements, description};
+        List<String[]> existingJobs = FileUtil.readCSV("jobs.csv");
+        existingJobs.add(newJob);
+        FileUtil.writeCSV("jobs.csv", existingJobs);
+        return true;
+    }
+
+    private String currentUserId;
+    public void setCurrentUserId(String userId) {
+        this.currentUserId = userId;
+    }
 }

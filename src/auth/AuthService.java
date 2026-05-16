@@ -19,6 +19,10 @@ public class AuthService {
     }
 
     public boolean register(String studentId, String password, String name) {
+        return register(studentId, password, name, "TA");
+    }
+
+    public boolean register(String studentId, String password, String name, String role) {
         if (studentId == null || studentId.trim().isEmpty()) {
             System.out.println("Student ID cannot be empty");
             return false;
@@ -30,6 +34,9 @@ public class AuthService {
         if (name == null || name.trim().isEmpty()) {
             System.out.println("Name cannot be empty");
             return false;
+        }
+        if (role == null || role.trim().isEmpty()) {
+            role = "TA";
         }
 
         if (!isValidPassword(password)) {
@@ -46,7 +53,7 @@ public class AuthService {
             }
         }
 
-        String[] newUser = {studentId, password, name};
+        String[] newUser = {studentId, password, name, role};
         users.add(newUser);
 
         FileUtil.writeCSV("users.csv", users);
@@ -99,5 +106,9 @@ public class AuthService {
     public boolean hasRole(String studentId, String requiredRole) {
         String userRole = getUserRole(studentId);
         return userRole.equals(requiredRole);
+    }
+    
+    public static List<String[]> getUsers() {
+        return FileUtil.readCSV("users.csv");
     }
 }

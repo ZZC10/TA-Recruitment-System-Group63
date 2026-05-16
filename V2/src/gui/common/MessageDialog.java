@@ -22,6 +22,10 @@ public class MessageDialog {
         return result == JOptionPane.YES_OPTION;
     }
     
+    public static void showSuccess(Component parent, String title, String message) {
+        showInfo(parent, title, message);
+    }
+
     public static void showSuccess(Component parent, String message) {
         showInfo(parent, "Success", message);
     }

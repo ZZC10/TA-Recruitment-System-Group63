@@ -48,15 +48,15 @@ public class JobService {
     }
 
     // TA apply for a job
-    public void applyForJob(String studentId, String jobId) {
+    public boolean applyForJob(String studentId, String jobId) {
         if (!authService.hasRole(studentId, "TA")) {
             System.out.println("Permission denied: Only TA can apply for jobs.");
-            return;
+            return false;
         }
 
         if (!jobExists(jobId)) {
             System.out.println("Error: Job ID " + jobId + " does not exist.");
-            return;
+            return false;
         }
 
         boolean success = applicationService.applyForJob(studentId, jobId);
@@ -65,6 +65,7 @@ public class JobService {
         } else {
             System.out.println("Failed to apply for this job.");
         }
+        return success;
     }
 
     // MO view applicants for a job
