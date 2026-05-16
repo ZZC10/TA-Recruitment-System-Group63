@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import gui.job.JobBrowseWindow;
+import gui.job.ApplicationWindow;
 
 public class MainFrame extends JFrame {
     
@@ -136,7 +138,39 @@ public class MainFrame extends JFrame {
         this.currentUser = userId;
         this.currentRole = role;
         updateUserInfo();
+
+        // Show TA menu when role is TA
+        if ("TA".equals(role)) {
+           showTAMenu();
+        }
     }
+
+    public void showTAMenu() {
+    JPanel taPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+    taPanel.setBackground(Color.WHITE);
+    taPanel.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
+    
+    JButton browseJobsBtn = new JButton("Browse Jobs");
+    JButton myApplicationsBtn = new JButton("My Applications");
+    
+    browseJobsBtn.setFont(new Font("Arial", Font.BOLD, 18));
+    myApplicationsBtn.setFont(new Font("Arial", Font.BOLD, 18));
+    
+    browseJobsBtn.addActionListener(e -> {
+        gui.job.JobBrowseWindow browseWindow = new gui.job.JobBrowseWindow(currentUser);
+        browseWindow.setVisible(true);
+    });
+    
+    myApplicationsBtn.addActionListener(e -> {
+        gui.job.ApplicationWindow appWindow = new gui.job.ApplicationWindow(currentUser);
+        appWindow.setVisible(true);
+    });
+    
+    taPanel.add(browseJobsBtn);
+    taPanel.add(myApplicationsBtn);
+    
+    setContentPanel(taPanel);
+}
     
     public void updateUserInfo() {
         if (currentUser != null && currentRole != null) {

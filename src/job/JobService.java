@@ -42,6 +42,11 @@ public class JobService {
         System.out.println("==========================");
     }
 
+        // Get all jobs as List (for GUI table)
+    public List<String[]> getAllJobs() {
+        return FileUtil.readCSV("jobs.csv");
+    }
+
     // TA apply for a job
     public void applyForJob(String studentId, String jobId) {
         if (!authService.hasRole(studentId, "TA")) {
