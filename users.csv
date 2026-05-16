@@ -5,3 +5,4 @@ studentId,name,password,email,major,role
 MO001,Prof.Li,mo123456,professor@example.com,Computer Science,MO
 ADMIN001,Admin,admin123456,admin@example.com,Administration,ADMIN
 2023050,SSS,PP1234,,,TA
+2023999,SIXIDI,six666,,,TA
